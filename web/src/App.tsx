@@ -5,6 +5,7 @@ import { BanPopup } from './components/BanPopup'
 import { BookingDetails } from './components/BookingDetails'
 import { BookingForm, type FormInit } from './components/BookingForm'
 import { DayTimeline } from './components/DayTimeline'
+import { Legend } from './components/Legend'
 import { MyBookings } from './components/MyBookings'
 import { RoomCalendar } from './components/RoomCalendar'
 import { RoomList } from './components/RoomList'
@@ -58,6 +59,7 @@ export default function App() {
       <TopBar handedCount={handedCount} onMyBookings={() => setMineOpen(true)} onSettings={() => setSettingsOpen(true)} onAdmin={() => setAdminOpen(true)} />
       <main className="page">
         <SearchBar search={search} onChange={setSearch} />
+        <Legend />
         {loading ? (
           <p className="muted">{t('loading', lang)}</p>
         ) : (
