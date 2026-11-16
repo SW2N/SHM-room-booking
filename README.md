@@ -10,7 +10,7 @@ Meeting-room booking platform for Sahamit Products (9 rooms, Academy and Korn Th
 - Project: `shm-room-booking` (ref `lxhufflxarrwykmvbtna`, region Singapore, org SHM.ORG, free plan)
 - API URL: `https://lxhufflxarrwykmvbtna.supabase.co`
 - Publishable key (public by design): `sb_publishable_nLrbm7Cp_b4iONCJwTOakQ_PtkFqfoI`
-- Auth: email + password, **Confirm email = OFF** (set in dashboard: Authentication → Sign In / Providers → Email). Status: _pending_.
+- Auth: email + password, **Confirm email = OFF** (set in dashboard: Authentication → Sign In / Providers → Email). Status: done (16 Nov 2026).
 
 ## Database changes
 
