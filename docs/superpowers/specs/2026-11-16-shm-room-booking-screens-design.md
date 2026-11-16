@@ -1,6 +1,6 @@
 # SHM Meeting Room Booking — Phase 2: Screens design
 
-**Date:** 16 Nov 2026 · **Owner:** Sunpawat Wongjumras (SW Admin) · **Status:** Draft for approval
+**Date:** 16 Nov 2026 · **Owner:** Sunpawat Wongjumras (SW Admin) · **Status:** Approved 16 Nov 2026
 **Builds on:** `2026-11-16-shm-room-booking-design.md` (Phase 1 back end, done: Supabase project `lxhufflxarrwykmvbtna`, 104 tests green)
 
 ## 1. Why
