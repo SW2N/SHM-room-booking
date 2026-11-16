@@ -5,7 +5,7 @@ begin
 a := tests.make_user('a5@sahamitproduct.com', 'A5');
 b := tests.make_user('b5@sahamitproduct.com', 'B5');
 m := tests.make_user('m5@sahamitproduct.com', 'M5', true);
-d := (now() at time zone 'Asia/Bangkok')::date + 7;
+d := (now() at time zone 'Asia/Bangkok')::date + 35;
 while extract(isodow from d) <> 2 loop d := d + 1; end loop;   -- a Tuesday at least a week ahead
 return next plan(10);
 

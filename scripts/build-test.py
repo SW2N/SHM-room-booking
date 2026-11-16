@@ -1,15 +1,19 @@
-"""Print a runnable test script (see scripts/run-tests.md).
+"""Print a script that installs a test file as tests.t_<name>() and runs it once (see scripts/run-tests.md).
 
 The test file holds the body of a PL/pgSQL function: `return next <assertion>;` lines,
 `perform ...;` / plain statements for setup, ending with `return query select * from finish();`.
 A body may start with its own `declare ... begin` section.
-It is wrapped as tests.run(), called once (execute_sql only returns the last result set),
-inside begin; ... rollback; so nothing is kept.
+The call ends in rollback, so nothing is kept (execute_sql runs the whole call as one transaction).
+execute_sql only returns the last result set,
+which is why each file is one function.
 """
 import pathlib
+import re
 import sys
 
-body = pathlib.Path(sys.argv[1]).read_text(encoding="utf-8")
+path = pathlib.Path(sys.argv[1])
+name = "t_" + re.sub(r"[^a-z0-9]+", "_", path.name.split(".")[0].lower())
+body = path.read_text(encoding="utf-8")
 head = "" if body.lstrip().lower().startswith("declare") else "begin\n"
-print("begin;\ncreate or replace function tests.run() returns setof text language plpgsql as $TEST$\n"
-      + head + body + "\nend $TEST$;\nselect * from tests.run();\nrollback;")
+print(f"create or replace function tests.{name}() returns setof text language plpgsql as $TEST$\n"
+      + head + body + f"\nend $TEST$;\nbegin;\nselect * from tests.{name}();\nrollback;")

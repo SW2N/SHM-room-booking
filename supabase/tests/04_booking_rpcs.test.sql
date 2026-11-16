@@ -5,7 +5,7 @@ begin
 a := tests.make_user('a4@sahamitproduct.com', 'A4');
 b := tests.make_user('b4@sahamitproduct.com', 'B4');
 m := tests.make_user('m4@sahamitproduct.com', 'M4', true);
-s1 := tests.slot(7, '10:00'); e1 := tests.slot(7, '11:00');
+s1 := tests.slot(35, '10:00'); e1 := tests.slot(35, '11:00');
 return next plan(11);
 
 bid := tests.val(a, format('select (create_booking(%L, %L, %L, %L)).id', 'KT5-3', s1, e1, 'Sales'))::uuid;

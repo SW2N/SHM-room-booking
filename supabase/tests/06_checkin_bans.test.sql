@@ -19,7 +19,7 @@ end $g$$f$;
 u := tests.make_user('u6@sahamitproduct.com', 'U6');
 o := tests.make_user('o6@sahamitproduct.com', 'O6');
 m := tests.make_user('m6@sahamitproduct.com', 'M6', true);
-d := (tests.slot(7, '09:00') at time zone 'Asia/Bangkok')::date;
+d := (tests.slot(35, '09:00') at time zone 'Asia/Bangkok')::date;
 t0 := d::timestamp at time zone 'Asia/Bangkok';   -- midnight Bangkok on day d
 execute format(ins, 'KT5-1', u, t0 + interval '9 hours',  t0 + interval '10 hours') into b1;
 execute format(ins, 'KT5-1', u, t0 + interval '10 hours', t0 + interval '11 hours') into b2;
@@ -55,7 +55,7 @@ return next is((select jsonb_array_length(missed) from bans where user_id = u), 
 return next is((select no_show_streak from profiles where id = u), 0, 'streak reset after ban');
 return next is((select status || '/' || cancelled_reason from bookings where id = occ), 'cancelled/ban', 'future series booking cancelled');
 return next is((select status from bookings where id = bp), 'checked_in', 'booking already in progress is kept');
-return next is(tests.try(u, format('select create_booking(%L, %L, %L, %L)', 'KT6-2', tests.slot(8, '10:00'), tests.slot(8, '11:00'), 'X')),
+return next is(tests.try(u, format('select create_booking(%L, %L, %L, %L)', 'KT6-2', tests.slot(36, '10:00'), tests.slot(36, '11:00'), 'X')),
                'BANNED', 'banned user cannot book');
 
 return next is(tests.try(o, format('select admin_lift_ban(%L)', u)), 'NOT_ADMIN', 'only admins lift bans');

@@ -57,3 +57,4 @@ begin
     d := d + 1;
   end loop;
 end $$;
+update public.profiles set is_demo = true where email like 'mock.%@sahamitproduct.com';
