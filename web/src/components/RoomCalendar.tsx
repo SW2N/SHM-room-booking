@@ -67,6 +67,7 @@ export function RoomCalendar({ room, search, onSlotClick, onEventClick }: {
         navLinks
         selectable
         selectMirror
+        selectLongPressDelay={150}
         businessHours={{ daysOfWeek: [1, 2, 3, 4, 5], startTime: '08:00', endTime: '20:00' }}
         dayCellClassNames={(a) => {
           const day = a.date.toISOString().slice(0, 10)

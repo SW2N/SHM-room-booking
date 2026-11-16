@@ -12,17 +12,18 @@ const ROOMS = [
   room('KT6-2', 'ยกนิ้ว', 'S', 'Korn Thong', 9),
 ]
 
-vi.mock('../state/session', () => ({ useSession: () => ({ lang: 'th', profile: { id: 'me' } }) }))
+vi.mock('../state/session', () => ({ useSession: () => ({ lang: 'th', profile: { id: 'me' }, isAdmin: false }) }))
 vi.mock('../state/data', () => ({
   useData: () => ({
     rooms: ROOMS,
+    holidays: [{ day: '2026-12-31', name_th: 'วันสิ้นปี', name_en: null }],
     holds: [],
-    bookings: [{ id: 'b1', room_code: 'KT5-1', starts_at: '2026-11-24T14:00:00+07:00', ends_at: '2026-11-24T15:00:00+07:00', status: 'confirmed' }],
+    bookings: [{ id: 'b1', room_code: 'KT5-1', starts_at: '2099-11-24T14:00:00+07:00', ends_at: '2099-11-24T15:00:00+07:00', status: 'confirmed' }],
   }),
 }))
 
 afterEach(cleanup)
-const base = { date: '2026-11-24', start: '14:00', end: '15:30', sizes: [] as Room['size_class'][] }
+const base = { date: '2099-11-24', start: '14:00', end: '15:30', sizes: [] as Room['size_class'][] }
 
 describe('RoomList', () => {
   it('marks a room booked during the chosen time as taken', () => {
@@ -42,6 +43,11 @@ describe('RoomList', () => {
   it('never shows room codes', () => {
     render(<RoomList search={base} selected="KT5-2" onSelect={() => {}} onBook={() => {}} />)
     expect(document.body.textContent).not.toMatch(/KT5-1|AC2-2/)
+  })
+  it('shows rooms as closed on a holiday, with no Book button', () => {
+    render(<RoomList search={{ ...base, date: '2026-12-31' }} selected="KT5-2" onSelect={() => {}} onBook={() => {}} />)
+    expect(document.body.textContent).not.toMatch(/ว่าง/)
+    expect(screen.queryByRole('button', { name: /^จอง/ })).toBeNull()
   })
   it('offers to book the selected room when it is free', () => {
     render(<RoomList search={base} selected="KT5-2" onSelect={() => {}} onBook={() => {}} />)

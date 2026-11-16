@@ -35,6 +35,16 @@ describe('useHold', () => {
     expect(api.releaseHold).toHaveBeenCalledWith('h1')
   })
 
+  it('re-places the hold when a renew finds it gone, and reports blocked if someone else took it', async () => {
+    api.renewHold.mockRejectedValue({ message: 'NOT_FOUND' })
+    const { result } = renderHook(() => useHold('KT5-1', S, E))
+    await act(async () => {})
+    api.placeHold.mockRejectedValue({ message: 'ROOM_HELD' })
+    await act(async () => { vi.advanceTimersByTime(60_000) })
+    expect(api.placeHold).toHaveBeenCalledTimes(2)
+    expect(result.current.status).toBe('blocked')
+  })
+
   it("reports blocked when someone else is booking the slot", async () => {
     api.placeHold.mockRejectedValue({ message: 'ROOM_HELD' })
     const { result } = renderHook(() => useHold('KT5-1', S, E))

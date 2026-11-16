@@ -12,7 +12,8 @@ const mk = (id: string, title: string, start: Date, unseen = false) => ({
 })
 vi.mock('../state/data', () => ({
   useData: () => ({
-    bookings: [mk('a', 'Weekly sync', later), mk('b', 'Handed meeting', later, true), mk('c', 'Today meeting', soon)],
+    bookings: [],
+    mine: [mk('a', 'Weekly sync', later), mk('b', 'Handed meeting', later, true), mk('c', 'Today meeting', soon)],
     reload: vi.fn(),
   }),
 }))
@@ -34,6 +35,7 @@ describe('MyBookings', () => {
   it('marks handed-over bookings as seen once when opened', () => {
     render(<MyBookings onClose={() => {}} onOpenBooking={() => {}} />)
     expect(api.acknowledgeHandovers).toHaveBeenCalledTimes(1)
+    expect(api.acknowledgeHandovers).toHaveBeenCalledWith(['b'])
   })
   it("offers check-in for today's booking", () => {
     render(<MyBookings onClose={() => {}} onOpenBooking={() => {}} />)

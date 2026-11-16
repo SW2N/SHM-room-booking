@@ -1,5 +1,5 @@
 import { roomState } from '../lib/availability'
-import { toTimestamp } from '../lib/dates'
+import { isoWeekday, toTimestamp } from '../lib/dates'
 import { t } from '../lib/i18n'
 import { roomName, roomsForSearch, type Search } from '../lib/search'
 import { useData } from '../state/data'
@@ -11,18 +11,22 @@ export function RoomList({ search, selected, onSelect, onBook }: {
   onSelect: (code: string) => void
   onBook: (code: string) => void
 }) {
-  const { lang, profile } = useSession()
-  const { rooms, bookings, holds } = useData()
+  const { lang, profile, isAdmin } = useSession()
+  const { rooms, bookings, holds, holidays } = useData()
+  const holiday = holidays.find((h) => h.day === search.date)
   const timed = Boolean(search.start && search.end)
   const start = timed ? toTimestamp(search.date, search.start!) : ''
+  // Weekends, holidays and times already passed can't be booked by non-admins: say so instead of "free".
+  const closed = !isAdmin && (isoWeekday(search.date) > 5 || Boolean(holiday) || (timed && new Date(start) < new Date()))
   const end = timed ? toTimestamp(search.date, search.end!) : ''
   const shown = roomsForSearch(rooms, search)
-  const state = (code: string) => (timed ? roomState(code, start, end, bookings, holds, profile?.id ?? '') : null)
+  const state = (code: string) => (timed && !closed ? roomState(code, start, end, bookings, holds, profile?.id ?? '') : null)
   const sel = shown.find((r) => r.code === selected)
   const selFree = sel && state(sel.code) === 'free'
 
   return (
     <section className="roomlist panel">
+      {closed && <p className="muted small">{holiday ? `${t('holiday', lang)} · ${(lang === 'en' && holiday.name_en) || holiday.name_th}` : t('cannotBookThisTime', lang)}</p>}
       {(['Academy', 'Korn Thong'] as const).map((b) => {
         const list = shown.filter((r) => r.building === b)
         if (!list.length) return null

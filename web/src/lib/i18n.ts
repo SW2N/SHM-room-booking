@@ -105,6 +105,8 @@ const STRINGS = {
   delete: { th: 'ลบ', en: 'Delete' },
   loading: { th: 'กำลังโหลด…', en: 'Loading…' },
   holiday: { th: 'วันหยุด', en: 'Holiday' },
+  cannotBookThisTime: { th: 'จองช่วงเวลานี้ไม่ได้', en: "This day or time can't be booked" },
+  holdLapsed: { th: 'หมดเวลากันห้อง กดจองอีกครั้ง', en: 'Your hold on this slot ended. Book again.' },
   required: { th: 'กรอกข้อมูลนี้', en: 'Fill this in' },
   UNTIL_BEFORE_START: { th: 'วันสิ้นสุดต้องอยู่หลังวันเริ่ม', en: 'The end date must be after the first date.' },
   NO_WEEKDAYS: { th: 'เลือกอย่างน้อย 1 วัน', en: 'Pick at least one day.' },

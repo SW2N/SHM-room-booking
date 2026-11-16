@@ -74,7 +74,7 @@ export function BookingDetails({ bookingId, onClose, onEdit }: {
           <div className="actions wrap">
             <button onClick={() => setStep('main')}>{t('close', lang)}</button>
             {can.isSeries && b.series_id && (
-              <button className="danger" disabled={busy} onClick={() => run(() => cancelSeries(b.series_id!, bkkDate(b.starts_at)), t('cancelled', lang))}>
+              <button className="danger" disabled={busy} onClick={() => run(() => cancelSeries(b.series_id!), t('cancelled', lang))}>
                 {t('wholeSeries', lang)}
               </button>
             )}

@@ -12,13 +12,11 @@ import { useToast } from './Toast'
 /** Your upcoming bookings; ones handed to you come first. Opening it counts as having seen them. */
 export function MyBookings({ onClose, onOpenBooking }: { onClose: () => void; onOpenBooking: (id: string) => void }) {
   const { lang, opts, profile } = useSession()
-  const { bookings, reload } = useData()
+  const { mine: own, reload } = useData()
   const toast = useToast()
   const acked = useRef(false)
   const now = new Date()
-  const mine = bookings.filter(
-    (b) => b.owner_id === profile?.id && (b.status === 'confirmed' || b.status === 'checked_in') && new Date(b.ends_at) > now,
-  )
+  const mine = own.filter((b) => new Date(b.ends_at) > now)
   // Keep the handed-to-you list as it was when the panel opened, so it doesn't vanish once marked seen.
   const [handedIds] = useState(() => new Set(mine.filter((b) => b.handover_unseen).map((b) => b.id)))
   const handed = mine.filter((b) => handedIds.has(b.id))
@@ -27,8 +25,9 @@ export function MyBookings({ onClose, onOpenBooking }: { onClose: () => void; on
   useEffect(() => {
     if (acked.current) return
     acked.current = true
-    void acknowledgeHandovers().then(() => reload()).catch(() => {})
-  }, [reload])
+    if (!handedIds.size) return
+    void acknowledgeHandovers([...handedIds]).then(() => reload()).catch(() => {})
+  }, [reload, handedIds])
 
   async function doCheckIn(b: Booking) {
     try {

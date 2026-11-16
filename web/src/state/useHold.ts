@@ -29,8 +29,26 @@ export function useHold(room: string, startIso: string, endIso: string, bookingI
         setStatus(code === 'ROOM_HELD' || code === 'ROOM_TAKEN' ? 'blocked' : 'error')
         setError(e)
       })
+    const fail = (e: unknown) => {
+      if (closed) return
+      const code = (e as { message?: string })?.message ?? ''
+      setStatus(code === 'ROOM_HELD' || code === 'ROOM_TAKEN' ? 'blocked' : 'error')
+      setError(e)
+    }
     const timer = setInterval(() => {
-      if (holdId) void renewHold(holdId).catch(() => {})
+      if (!holdId) return
+      renewHold(holdId).catch((e) => {
+        if ((e as { message?: string })?.message === 'HOLD_EXPIRED') return fail(e)
+        // The hold lapsed or was cleared: try to take the slot again.
+        holdId = null
+        placeHold(room, startIso, endIso, bookingId)
+          .then((h) => {
+            if (closed) return void releaseHold(h.id).catch(() => {})
+            holdId = h.id
+            setStatus('held')
+          })
+          .catch(fail)
+      })
     }, 60_000)
     return () => {
       closed = true

@@ -27,6 +27,7 @@ const MESSAGES: Record<string, { th: string; en: string }> = {
   RECIPIENT_NOT_FOUND: { th: 'ไม่พบผู้ใช้ที่มีอีเมลนี้', en: 'No one with that email has an account.' },
   RECIPIENT_BANNED: { th: 'ผู้รับถูกระงับการจองอยู่', en: "That person's booking access is paused." },
   BAD_RULE: { th: 'การตั้งค่าจองซ้ำไม่ถูกต้อง', en: "The repeat settings aren't valid." },
+  HOLD_EXPIRED: { th: 'หมดเวลากันห้องแล้ว (30 นาที) ปิดแล้วเปิดแบบฟอร์มใหม่', en: 'Your 30-minute hold ended. Close and open the form again.' },
   NOT_ALLOWED: { th: 'ทำรายการนี้ไม่ได้', en: "You can't do that." },
   'Invalid login credentials': { th: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง', en: 'Wrong email or password.' },
   'User already registered': { th: 'อีเมลนี้มีบัญชีแล้ว', en: 'That email already has an account.' },

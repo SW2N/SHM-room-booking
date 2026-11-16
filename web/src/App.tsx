@@ -19,7 +19,7 @@ import { useSession } from './state/session'
 
 export default function App() {
   const { session, ready, recovering, profile, lang, refreshProfile } = useSession()
-  const { rooms, bookings, loading } = useData()
+  const { rooms, mine, loading } = useData()
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [banOpen, setBanOpen] = useState(false)
   const [search, setSearch] = useState<Search>(() => ({ date: todayBkk(), start: null, end: null, sizes: [] }))
@@ -28,7 +28,7 @@ export default function App() {
   const [details, setDetails] = useState<string | null>(null)
   const [mineOpen, setMineOpen] = useState(false)
   const [adminOpen, setAdminOpen] = useState(false)
-  const handedCount = bookings.filter((b) => b.owner_id === profile?.id && b.handover_unseen && new Date(b.ends_at) > new Date()).length
+  const handedCount = mine.filter((b) => b.handover_unseen).length
 
   const openNew = (room: string, startIso: string, endIso: string) =>
     setForm({ room, date: bkkDate(startIso), start: bkkTime(startIso), end: bkkTime(endIso), mode: 'new' })

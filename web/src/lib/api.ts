@@ -58,12 +58,11 @@ export const updateBooking = (id: string, room: string, start: string, end: stri
 export const cancelBooking = (id: string) => rpc<Booking>('cancel_booking', { p_id: id })
 export const createSeries = (room: string, title: string, firstDate: string, start: string, end: string, rule: Rule) =>
   rpc<SeriesResult>('create_series', { p_room: room, p_title: title, p_first_date: firstDate, p_start: start, p_end: end, p_rule: rule })
-export const cancelSeries = (seriesId: string, fromDate?: string) =>
-  rpc<number>('cancel_series', { p_series_id: seriesId, p_from: fromDate ?? null })
+export const cancelSeries = (seriesId: string) => rpc<number>('cancel_series', { p_series_id: seriesId })
 export const checkIn = (id: string) => rpc<Booking>('check_in', { p_id: id })
 export const handOver = (id: string, wholeSeries: boolean, email: string) =>
   rpc<number>('hand_over', { p_booking_id: id, p_whole_series: wholeSeries, p_to_email: email })
-export const acknowledgeHandovers = () => rpc<number>('acknowledge_handovers')
+export const acknowledgeHandovers = (ids: string[]) => rpc<number>('acknowledge_handovers', { p_ids: ids })
 export const placeHold = (room: string, start: string, end: string, bookingId?: string) =>
   rpc<Hold>('place_hold', { p_room: room, p_starts: start, p_ends: end, p_booking_id: bookingId ?? null })
 export const renewHold = (id: string) => rpc<Hold>('renew_hold', { p_id: id })
