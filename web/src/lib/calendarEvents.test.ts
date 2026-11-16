@@ -70,7 +70,10 @@ describe('viewDate', () => {
   it('week and month views keep the chosen date while it is on screen', () => {
     expect(viewDate('timeGridWeek', '2026-11-16', '2026-11-18', '2026-11-23')).toBe('2026-11-18')
   })
-  it('and move it to the first day shown when it is not', () => {
-    expect(viewDate('timeGridWeek', '2026-11-23', '2026-11-18', '2026-11-30')).toBe('2026-11-23')
+  it('and move it to the first working day shown when it is not (weeks start on Sunday)', () => {
+    expect(viewDate('timeGridWeek', '2026-11-22', '2026-11-18', '2026-11-29')).toBe('2026-11-23')
+  })
+  it('a month starting on a weekend moves to its first weekday', () => {
+    expect(viewDate('dayGridMonth', '2026-11-01', '2026-10-20', '2026-12-01')).toBe('2026-11-02')
   })
 })

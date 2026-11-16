@@ -33,7 +33,7 @@
   --ac-soft: #e8efe9;
   --ac-line: #b8cbbd;
   /* Hour stripes: 9:00 white, 10:00 grey, 11:00 white, ... */
-  --hour-shade: #eeeeeb;
+  --hour-shade: #f5f5f2;
   --day-off: repeating-linear-gradient(135deg, rgba(138, 137, 131, 0.16) 0 6px, rgba(138, 137, 131, 0.05) 6px 12px);
   --radius: 8px;
   --s1: 4px;
@@ -98,7 +98,7 @@ ul.plain { list-style: none; padding: 0; margin: var(--s2) 0; display: flex; fle
 /* Modal and toast */
 .overlay { position: fixed; inset: 0; background: rgba(20, 20, 18, 0.45); display: grid; place-items: center; padding: var(--s4); z-index: 50; }
 .modal { width: min(460px, 100%); max-height: 90vh; overflow: auto; background: var(--surface); border-radius: 12px; border: 1px solid var(--border); }
-.modal.wide { width: min(640px, 100%); }
+.modal.wide { width: min(860px, 100%); }
 .modal-head { display: flex; justify-content: space-between; align-items: center; padding: var(--s3) var(--s4); border-bottom: 1px solid var(--border); }
 .modal-body { padding: var(--s4); display: flex; flex-direction: column; gap: var(--s3); }
 .modal-body p { margin: 0; }
@@ -118,6 +118,8 @@ ul.plain { list-style: none; padding: 0; margin: var(--s2) 0; display: flex; fle
 .datefield-box input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: none; padding: 0; min-height: 0; }
 .datefield-box:focus-within { outline: 2px solid var(--accent); outline-offset: 1px; }
 .datefield-box.disabled { background: var(--surface-2); color: var(--text-3); }
+.datefield-box.invalid, input[aria-invalid='true'] { border-color: var(--danger); }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .datefield-box.disabled input { cursor: default; }
 .chip { padding: 4px 10px; border-radius: 999px; font-size: 13px; }
 .chip.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-text); }
@@ -172,8 +174,12 @@ button.book { width: 100%; }
 /* Calendar (FullCalendar) in the neutral style */
 .calendar h3.room-head { margin: calc(-1 * var(--s3)) calc(-1 * var(--s3)) var(--s3); padding: var(--s2) var(--s3); background: var(--tone); color: #fff; border-radius: 12px 12px 0 0; font-size: 15px; }
 .calendar h3.room-head span { font-weight: 400; opacity: 0.85; font-size: 13px; }
-.fc .fc-timegrid-slot-lane.hour-shade, .fc .fc-timegrid-slot-label.hour-shade { background: var(--hour-shade); }
+/* Each hour reads as one block: the label column is shaded for the whole hour (both half-hour rows), with no
+   half-hour line through it. */
+.fc .fc-timegrid-slot-lane.hour-shade,
+.fc :is([data-time^="08:"], [data-time^="10:"], [data-time^="12:"], [data-time^="14:"], [data-time^="16:"], [data-time^="18:"]).fc-timegrid-slot-label { background: var(--hour-shade); }
 .fc .fc-timegrid-slot-label { vertical-align: top; }
+.fc .fc-timegrid-slot-label.fc-timegrid-slot-minor { border-top-color: transparent; }
 .calendar .fc { --fc-border-color: var(--border); --fc-button-bg-color: var(--surface); --fc-button-text-color: var(--text); --fc-button-border-color: var(--border-strong); --fc-button-hover-bg-color: var(--surface-2); --fc-button-hover-border-color: var(--border-strong); --fc-button-active-bg-color: var(--accent-soft); --fc-button-active-border-color: var(--accent); --fc-today-bg-color: transparent; --fc-non-business-color: transparent; font-size: 13px; }
 .calendar .fc .fc-button-primary:not(:disabled).fc-button-active { color: var(--accent-text); }
 .calendar .fc .fc-toolbar-title { font-size: 15px; font-weight: 600; }
@@ -252,3 +258,20 @@ dl.details dd { margin: 0; }
 .mine-row > :is(button.primary, .state) { grid-area: action; }
 .handed { background: var(--accent-soft); border-radius: var(--radius); padding: var(--s3); }
 .handed h3 { color: var(--accent-text); }
+
+/* Holiday table (admin) */
+label.button-like { position: relative; flex-direction: row; display: inline-flex; align-items: center; cursor: pointer; border: 1px solid var(--border-strong); background: var(--surface); border-radius: var(--radius); padding: 6px 12px; color: var(--text); font-size: 14px; }
+label.button-like:hover { background: var(--surface-2); }
+label.button-like:focus-within { outline: 2px solid var(--accent); outline-offset: 1px; }
+.sheet-scroll { max-height: 46vh; overflow: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+table.sheet { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.sheet th { position: sticky; top: 0; z-index: 1; background: var(--surface-2); text-align: left; font-weight: 600; color: var(--text-2); padding: 6px 8px; border-bottom: 1px solid var(--border); }
+table.sheet td { padding: 4px 6px; border-bottom: 1px solid var(--border); vertical-align: top; }
+table.sheet tr.changed td { background: #fff8e6; }
+table.sheet input { width: 100%; min-width: 120px; }
+table.sheet .datefield-box { min-width: 128px; }
+table.sheet td:last-child { width: 32px; text-align: center; vertical-align: middle; }
+.cell-error { display: block; color: var(--danger); font-size: 11px; margin-top: 2px; }
+button.danger-link { color: var(--danger); font-size: 14px; padding: 4px; }
+.sheet-foot { display: flex; align-items: center; gap: var(--s2); flex-wrap: wrap; }
+.sheet-foot .muted { margin-left: auto; }

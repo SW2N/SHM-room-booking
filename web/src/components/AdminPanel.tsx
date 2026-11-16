@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
-import { addHoliday, adminLiftBan, adminRemoveUser, deleteHoliday, findProfileByEmail } from '../lib/api'
-import { bkkDate, bkkTime, formatDate, todayBkk } from '../lib/dates'
+import { adminLiftBan, adminRemoveUser, findProfileByEmail } from '../lib/api'
+import { bkkDate, bkkTime, formatDate } from '../lib/dates'
 import { errorMessage } from '../lib/errors'
 import { t } from '../lib/i18n'
-import { useData } from '../state/data'
 import { useSession } from '../state/session'
 import { supabase } from '../supabase'
-import { DateField } from './DateField'
+import { HolidayTable } from './HolidayTable'
 import { Modal } from './Modal'
 import { useToast } from './Toast'
 
@@ -14,13 +13,9 @@ type BanRow = { user_id: string; ends_at: string; profiles: { display_name: stri
 
 export function AdminPanel({ onClose }: { onClose: () => void }) {
   const { lang, opts } = useSession()
-  const { holidays, reload } = useData()
   const toast = useToast()
   const [bans, setBans] = useState<BanRow[]>([])
   const [email, setEmail] = useState('')
-  const [hDay, setHDay] = useState('')
-  const [hTh, setHTh] = useState('')
-  const [hEn, setHEn] = useState('')
 
   const loadBans = useCallback(async () => {
     const { data } = await supabase
@@ -76,25 +71,7 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
         </div>
       </section>
 
-      <section className="form">
-        <h3>{t('holidays', lang)}</h3>
-        <div className="row">
-          <DateField label={t('date', lang)} value={hDay} opts={opts} onChange={setHDay} />
-          <input placeholder={t('nameTh', lang)} value={hTh} onChange={(e) => setHTh(e.target.value)} />
-          <input placeholder={t('nameEn', lang)} value={hEn} onChange={(e) => setHEn(e.target.value)} />
-          <button disabled={!hDay || !hTh.trim()} onClick={() => act(() => addHoliday(hDay, hTh.trim(), hEn.trim()), t('saved', lang), async () => {
-            setHDay(''); setHTh(''); setHEn(''); await reload()
-          })}>{t('addHoliday', lang)}</button>
-        </div>
-        <ul className="plain">
-          {holidays.filter((h) => h.day >= todayBkk()).map((h) => (
-            <li key={h.day} className="row">
-              <span>{formatDate(h.day, opts)} · {(lang === 'en' && h.name_en) || h.name_th}</span>
-              <button className="link" onClick={() => act(() => deleteHoliday(h.day), t('saved', lang), reload)}>{t('delete', lang)}</button>
-            </li>
-          ))}
-        </ul>
-      </section>
+      <HolidayTable />
     </Modal>
   )
 }

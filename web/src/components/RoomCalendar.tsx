@@ -59,10 +59,11 @@ export function RoomCalendar({ room, search, onSlotClick, onEventClick, onDateCh
         initialView="timeGridDay"
         initialDate={search.date}
         timeZone="UTC"
-        firstDay={1}
+        firstDay={0}
         dayHeaderFormat={{ weekday: 'short', day: 'numeric', month: 'numeric', omitCommas: true }}
         views={{
           timeGridDay: { dayHeaders: false }, // the title already names the day
+          timeGridWeek: { weekends: false }, // a work week, Monday to Friday
           dayGridMonth: { dayHeaderFormat: { weekday: 'short' } },
         }}
         slotLaneClassNames={(a) => [hourBand(a.date!.getUTCHours())]}

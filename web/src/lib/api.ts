@@ -96,6 +96,17 @@ export async function addHoliday(day: string, nameTh: string, nameEn: string) {
   const { error } = await supabase.from('holidays').insert({ day, name_th: nameTh, name_en: nameEn || null })
   if (error) throw error
 }
+/** Saves the holiday table's edits: removed dates first, then new and changed rows. */
+export async function saveHolidays({ upserts, deletes }: { upserts: Holiday[]; deletes: string[] }) {
+  if (deletes.length) {
+    const { error } = await supabase.from('holidays').delete().in('day', deletes)
+    if (error) throw error
+  }
+  if (upserts.length) {
+    const { error } = await supabase.from('holidays').upsert(upserts, { onConflict: 'day' })
+    if (error) throw error
+  }
+}
 export async function deleteHoliday(day: string) {
   const { error } = await supabase.from('holidays').delete().eq('day', day)
   if (error) throw error

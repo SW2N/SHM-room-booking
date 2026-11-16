@@ -1,7 +1,7 @@
 import type { EventInput } from '@fullcalendar/core'
 import type { Booking, Hold } from './api'
 import { isLiveHold } from './availability'
-import { addDays, bkkDate, bkkTime, type DateOpts, formatDate, formatMonth, type Lang, toTimestamp, weekdayName } from './dates'
+import { addDays, bkkDate, bkkTime, type DateOpts, formatDate, formatMonth, isoWeekday, type Lang, toTimestamp, weekdayName } from './dates'
 import { t } from './i18n'
 
 // The calendar runs in "UTC" with Bangkok wall-clock times fed in, so every browser shows Bangkok time
@@ -35,7 +35,10 @@ export function calendarTitle(start: Date, end: Date | undefined, opts: DateOpts
  */
 export function viewDate(viewType: string, viewStart: string, current: string, viewEnd: string): string {
   if (viewType === 'timeGridDay') return viewStart
-  return current >= viewStart && current < viewEnd ? current : viewStart
+  if (current >= viewStart && current < viewEnd) return current
+  // Weeks start on Sunday and the week view shows working days only, so land on the first weekday.
+  const wd = isoWeekday(viewStart)
+  return wd > 5 ? addDays(viewStart, 8 - wd) : viewStart
 }
 
 const ACTIVE = new Set(['confirmed', 'checked_in'])
