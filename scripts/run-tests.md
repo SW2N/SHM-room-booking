@@ -10,7 +10,7 @@ Each `supabase/tests/NN_*.test.sql` file is the body of a PL/pgSQL function (`re
   `tests.t_NN_name()` and runs it, ending in `rollback;`. Pass it to Supabase MCP `execute_sql`
   (project `lxhufflxarrwykmvbtna`). `execute_sql` runs the whole call as ONE transaction, so the final `rollback`
   removes the function and everything the test created.
-- **Whole suite in one call:** paste every built test's `create function` part plus `supabase/tests/_suite.sql`, then
+- **Whole suite:** the tests are installed (migration `…0013_test_suite.sql`); run `select * from tests.suite(); rollback;` — one row per test file.
   `select * from tests.suite(); rollback;` — one row per test file with passed/failed counts.
 
 Nothing a test creates is kept. Tests book about 5 weeks ahead to stay clear of the mock data.
