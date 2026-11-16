@@ -100,6 +100,8 @@ const STRINGS = {
   removed: { th: 'ลบแล้ว', en: 'Removed' },
   holidays: { th: 'วันหยุด', en: 'Holidays' },
   addHoliday: { th: 'เพิ่มวันหยุด', en: 'Add holiday' },
+  year: { th: 'ปี', en: 'Year' },
+  saveFirst: { th: 'บันทึกหรือยกเลิกการแก้ไขก่อนเปลี่ยนปี', en: 'Save or discard your changes before changing the year' },
   addRow: { th: '+ เพิ่มแถว', en: '+ Add row' },
   removeRow: { th: 'ลบแถว', en: 'Remove row' },
   uploadExcel: { th: 'อัปโหลด Excel', en: 'Upload Excel' },

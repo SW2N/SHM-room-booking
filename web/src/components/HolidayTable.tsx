@@ -19,10 +19,18 @@ export function HolidayTable() {
   const { lang, opts } = useSession()
   const { holidays, reload } = useData()
   const toast = useToast()
-  // This year onwards: past years stay in the database but out of the way.
-  const from = `${todayBkk().slice(0, 4)}-01-01`
+  // One year at a time. Starts on this year, or the next year that has holidays listed.
+  const thisYear = Number(todayBkk().slice(0, 4))
+  const years = useMemo(() => {
+    const ys = new Set([thisYear, thisYear + 1, ...holidays.map((h) => Number(h.day.slice(0, 4)))])
+    return [...ys].sort((a, b) => a - b)
+  }, [holidays, thisYear])
+  const [year, setYear] = useState(() => {
+    const listed = holidays.map((h) => Number(h.day.slice(0, 4))).filter((y) => y >= thisYear).sort((a, b) => a - b)
+    return listed.includes(thisYear) || !listed.length ? thisYear : listed[0]
+  })
   // Keyed by content, so a refetch with the same holidays doesn't count as a change.
-  const originalKey = JSON.stringify(holidays.filter((h) => h.day >= from))
+  const originalKey = JSON.stringify(holidays.filter((h) => h.day.startsWith(`${year}-`)))
   const original = useMemo(() => JSON.parse(originalKey) as typeof holidays, [originalKey])
   const [rows, setRows] = useState<HolidayRow[]>(() => fromHolidays(original))
   const [note, setNote] = useState<{ text: string; warn?: boolean }[]>([])
@@ -39,6 +47,13 @@ export function HolidayTable() {
     if (!dirty) setRows(fromHolidays(original))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [original])
+
+  // Changing the year shows that year's list (only allowed with nothing unsaved).
+  useEffect(() => {
+    setRows(fromHolidays(original))
+    setNote([])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [year])
 
   const edit = (key: string, patch: Partial<HolidayRow>) => setRows((rs) => rs.map((r) => (r.key === key ? { ...r, ...patch } : r)))
 
@@ -67,7 +82,7 @@ export function HolidayTable() {
       { value: h.name_th },
       { value: h.name_en ?? '' },
     ])
-    await writeXlsxFile([header, ...data] as never, { columns: [{ width: 14 }, { width: 36 }, { width: 36 }] }).toFile('SHM-holidays.xlsx')
+    await writeXlsxFile([header, ...data] as never, { columns: [{ width: 14 }, { width: 36 }, { width: 36 }] }).toFile(`SHM-holidays-${opts.year === 'BE' ? year + 543 : year}.xlsx`)
   }
 
   async function save() {
@@ -90,6 +105,11 @@ export function HolidayTable() {
       <div className="tl-top">
         <h3>{t('holidays', lang)}</h3>
         <div className="row">
+          <label className="inline">{t('year', lang)}
+            <select value={year} disabled={dirty} title={dirty ? t('saveFirst', lang) : undefined} onChange={(e) => setYear(Number(e.target.value))}>
+              {years.map((y) => <option key={y} value={y}>{opts.year === 'BE' ? y + 543 : y}</option>)}
+            </select>
+          </label>
           <label className="button-like">
             {t('uploadExcel', lang)}
             <input ref={file} type="file" accept=".xlsx" aria-label={t('uploadExcel', lang)} className="sr-only"

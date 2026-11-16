@@ -11,7 +11,8 @@ const api = vi.hoisted(() => ({
 }))
 vi.mock('../lib/api', () => api)
 const reload = vi.hoisted(() => vi.fn().mockResolvedValue(undefined))
-vi.mock('../state/data', () => ({ useData: () => ({ holidays: [{ day: '2099-01-02', name_th: 'ทดสอบ', name_en: 'Test' }], reload }) }))
+const holidays = vi.hoisted(() => [{ day: '2099-01-02', name_th: 'ทดสอบ', name_en: 'Test' }, { day: '2100-05-05', name_th: 'ปีหน้า', name_en: 'Next year' }])
+vi.mock('../state/data', () => ({ useData: () => ({ holidays, reload }) }))
 vi.mock('../state/session', () => ({ useSession: () => ({ lang: 'en', opts: { lang: 'en', year: 'CE', format: 'long' } }) }))
 vi.mock('./Toast', () => ({ useToast: () => () => {} }))
 // Any query the panel makes resolves to no rows.
@@ -52,5 +53,14 @@ describe('AdminPanel holiday table', () => {
     expect(api.saveHolidays).not.toHaveBeenCalled()
     fireEvent.click(screen.getByRole('button', { name: 'Save changes' }))
     await waitFor(() => expect(api.saveHolidays).toHaveBeenCalledWith({ upserts: [{ day: '2099-01-03', name_th: 'วันทดสอบ', name_en: 'Test day' }], deletes: [] }))
+  })
+
+  it('the Year filter shows one year at a time', () => {
+    render(<AdminPanel onClose={() => {}} />)
+    expect(screen.getByDisplayValue('Test')).toBeTruthy()
+    expect(screen.queryByDisplayValue('Next year')).toBeNull()
+    fireEvent.change(screen.getByLabelText('Year'), { target: { value: '2100' } })
+    expect(screen.getByDisplayValue('Next year')).toBeTruthy()
+    expect(screen.queryByDisplayValue('Test')).toBeNull()
   })
 })
