@@ -1,23 +1,32 @@
 import { useEffect, useState } from 'react'
-import { supabase } from './supabase'
+import { AuthScreen } from './components/AuthScreen'
+import { BanPopup } from './components/BanPopup'
+import { SettingsModal } from './components/SettingsModal'
+import { TopBar } from './components/TopBar'
+import { t } from './lib/i18n'
+import { useSession } from './state/session'
 
-// Phase 1 placeholder: proves the permanent link, publishing and the database connection work.
 export default function App() {
-  const [rooms, setRooms] = useState<number | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const { session, ready, recovering, profile, lang } = useSession()
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [banOpen, setBanOpen] = useState(false)
 
   useEffect(() => {
-    supabase
-      .from('rooms')
-      .select('code', { count: 'exact', head: true })
-      .then(({ count, error }) => (error ? setError(error.message) : setRooms(count ?? 0)))
-  }, [])
+    if (profile?.banned_until && new Date(profile.banned_until) > new Date()) setBanOpen(true)
+  }, [profile?.banned_until])
+
+  if (!ready) return <p className="muted" style={{ padding: 24 }}>{t('loading', lang)}</p>
+  if (recovering) return <AuthScreen reset />
+  if (!session) return <AuthScreen />
 
   return (
-    <main style={{ fontFamily: 'system-ui, sans-serif', maxWidth: 560, margin: '15vh auto', padding: 24 }}>
-      <h1>SHM Room Booking</h1>
-      <p>ระบบจองห้องประชุม — กำลังพัฒนา / coming soon</p>
-      <p>{error ? `Database: ${error}` : rooms === null ? 'Connecting…' : `Connected: ${rooms} rooms`}</p>
-    </main>
+    <>
+      <TopBar handedCount={0} onMyBookings={() => {}} onSettings={() => setSettingsOpen(true)} onAdmin={() => {}} />
+      <main className="page">
+        <p className="muted">{t('loading', lang)}</p>
+      </main>
+      {settingsOpen && <SettingsModal open onClose={() => setSettingsOpen(false)} />}
+      <BanPopup open={banOpen} onClose={() => setBanOpen(false)} />
+    </>
   )
 }
