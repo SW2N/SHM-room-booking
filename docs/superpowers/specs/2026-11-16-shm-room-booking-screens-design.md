@@ -54,6 +54,10 @@ One shared **search bar** on top: **date** · **start–end time** (30-min steps
 
 **Check-in window** becomes: from **00:00 (Bangkok) on the booking day** until **15 minutes after start**. No-show rule unchanged (not checked in by start + 15 min). Update `_check_in_at` with a failing test first; update test `06` cases that assumed the 1-hour window.
 
+**Live updates (decided):** every screen updates instantly when anyone books, edits, cancels, checks in or hands over (Supabase Realtime on `bookings` and `holds`), not on a timer.
+
+**Holds while booking or editing (decided):** opening the booking form, or editing a booking's time/room, places a **hold** on that room and time range for that person. Others see the slot striped as "being booked by <name>" and cannot select it. The hold is released on save or close. Back end: new `holds` table (room, start, end, user, expires_at); `place_hold` / `release_hold` RPCs; `create_booking`, `create_series` and `update_booking` refuse a range overlapping someone else's live hold with **`ROOM_HELD`**; holds are readable by signed-in users and included in Realtime.
+
 ## 7. Look (decided)
 
 Clean neutral style: white/light-grey surfaces, one accent colour for selection and the primary button, green for free, muted grey for taken, red only for errors. Thai-friendly font (Noto Sans Thai / system). No SHM branding.
@@ -62,7 +66,7 @@ Clean neutral style: white/light-grey surfaces, one accent colour for selection 
 
 1. **Default view on open:** today, no time chosen, all sizes, first room selected, A in Day view.
 2. **Language default** Thai; dates default พ.ศ. long format (`24 พ.ย. 2569`) as stored in the profile.
-3. **Live updates:** the page refreshes bookings every 30 seconds and after every action (Supabase realtime can come later).
+3. **Hold expiry:** an untouched hold expires after **5 minutes**; while the form stays open it renews itself every minute.
 4. **Data reads:** `booking_details` view for bookings; `rooms`; `holidays`; `my_profile()` for the signed-in person (other people's ban status is not readable).
 5. **Error text:** one Thai + English message per back-end error code (`ROOM_TAKEN`, `HOLIDAY`, `BANNED`, `CHECKIN_WINDOW`, …).
 6. **Time inputs** are dropdowns of 30-minute steps, so invalid times can't be typed.
