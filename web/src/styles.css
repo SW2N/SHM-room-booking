@@ -152,3 +152,9 @@ fieldset.repeat legend { font-size: 13px; color: var(--text-2); padding: 0 var(-
 label.inline { flex-direction: row; align-items: center; gap: var(--s2); }
 label.inline input { width: 64px; }
 .small { font-size: 12px; }
+
+/* Booking details */
+dl.details { display: grid; grid-template-columns: max-content 1fr; gap: var(--s1) var(--s3); margin: 0; }
+dl.details dt { color: var(--text-2); font-size: 13px; }
+dl.details dd { margin: 0; }
+.actions.wrap { flex-wrap: wrap; justify-content: flex-start; }

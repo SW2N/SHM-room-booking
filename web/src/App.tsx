@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { AuthScreen } from './components/AuthScreen'
 import { BanPopup } from './components/BanPopup'
+import { BookingDetails } from './components/BookingDetails'
 import { BookingForm, type FormInit } from './components/BookingForm'
 import { DayTimeline } from './components/DayTimeline'
 import { RoomCalendar } from './components/RoomCalendar'
@@ -22,6 +23,7 @@ export default function App() {
   const [search, setSearch] = useState<Search>(() => ({ date: todayBkk(), start: null, end: null, sizes: [] }))
   const [selected, setSelected] = useState('')
   const [form, setForm] = useState<FormInit | null>(null)
+  const [details, setDetails] = useState<string | null>(null)
 
   const openNew = (room: string, startIso: string, endIso: string) =>
     setForm({ room, date: bkkDate(startIso), start: bkkTime(startIso), end: bkkTime(endIso), mode: 'new' })
@@ -55,14 +57,15 @@ export default function App() {
           <div className="section-a">
             <RoomList search={search} selected={selected} onSelect={setSelected}
               onBook={(room) => setForm({ room, date: search.date, start: search.start!, end: search.end!, mode: 'new' })} />
-            {selected && <RoomCalendar room={selected} search={search} onSlotClick={(s, e) => openNew(selected, s, e)} onEventClick={() => {}} />}
+            {selected && <RoomCalendar room={selected} search={search} onSlotClick={(s, e) => openNew(selected, s, e)} onEventClick={setDetails} />}
           </div>
         )}
         {!loading && (
           <DayTimeline search={search} selected={selected} onSelectRoom={setSelected}
-            onSlotClick={(room, s, e) => { setSelected(room); openNew(room, s, e) }} onEventClick={() => {}} />
+            onSlotClick={(room, s, e) => { setSelected(room); openNew(room, s, e) }} onEventClick={setDetails} />
         )}
       </main>
+      {details && <BookingDetails bookingId={details} onClose={() => setDetails(null)} onEdit={(init) => { setDetails(null); setForm(init) }} />}
       {form && <BookingForm key={JSON.stringify(form)} init={form} onClose={() => setForm(null)} onBanned={banned} />}
       {settingsOpen && <SettingsModal open onClose={() => setSettingsOpen(false)} />}
       <BanPopup open={banOpen} onClose={() => setBanOpen(false)} />
