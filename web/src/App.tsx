@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
+import { AdminPanel } from './components/AdminPanel'
 import { AuthScreen } from './components/AuthScreen'
 import { BanPopup } from './components/BanPopup'
 import { BookingDetails } from './components/BookingDetails'
 import { BookingForm, type FormInit } from './components/BookingForm'
 import { DayTimeline } from './components/DayTimeline'
+import { MyBookings } from './components/MyBookings'
 import { RoomCalendar } from './components/RoomCalendar'
 import { RoomList } from './components/RoomList'
 import { SearchBar } from './components/SearchBar'
@@ -17,13 +19,16 @@ import { useSession } from './state/session'
 
 export default function App() {
   const { session, ready, recovering, profile, lang, refreshProfile } = useSession()
-  const { rooms, loading } = useData()
+  const { rooms, bookings, loading } = useData()
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [banOpen, setBanOpen] = useState(false)
   const [search, setSearch] = useState<Search>(() => ({ date: todayBkk(), start: null, end: null, sizes: [] }))
   const [selected, setSelected] = useState('')
   const [form, setForm] = useState<FormInit | null>(null)
   const [details, setDetails] = useState<string | null>(null)
+  const [mineOpen, setMineOpen] = useState(false)
+  const [adminOpen, setAdminOpen] = useState(false)
+  const handedCount = bookings.filter((b) => b.owner_id === profile?.id && b.handover_unseen && new Date(b.ends_at) > new Date()).length
 
   const openNew = (room: string, startIso: string, endIso: string) =>
     setForm({ room, date: bkkDate(startIso), start: bkkTime(startIso), end: bkkTime(endIso), mode: 'new' })
@@ -48,7 +53,7 @@ export default function App() {
 
   return (
     <>
-      <TopBar handedCount={0} onMyBookings={() => {}} onSettings={() => setSettingsOpen(true)} onAdmin={() => {}} />
+      <TopBar handedCount={handedCount} onMyBookings={() => setMineOpen(true)} onSettings={() => setSettingsOpen(true)} onAdmin={() => setAdminOpen(true)} />
       <main className="page">
         <SearchBar search={search} onChange={setSearch} />
         {loading ? (
@@ -65,6 +70,8 @@ export default function App() {
             onSlotClick={(room, s, e) => { setSelected(room); openNew(room, s, e) }} onEventClick={setDetails} />
         )}
       </main>
+      {mineOpen && <MyBookings onClose={() => setMineOpen(false)} onOpenBooking={(id) => { setMineOpen(false); setDetails(id) }} />}
+      {adminOpen && <AdminPanel onClose={() => setAdminOpen(false)} />}
       {details && <BookingDetails bookingId={details} onClose={() => setDetails(null)} onEdit={(init) => { setDetails(null); setForm(init) }} />}
       {form && <BookingForm key={JSON.stringify(form)} init={form} onClose={() => setForm(null)} onBanned={banned} />}
       {settingsOpen && <SettingsModal open onClose={() => setSettingsOpen(false)} />}

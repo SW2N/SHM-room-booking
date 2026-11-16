@@ -158,3 +158,11 @@ dl.details { display: grid; grid-template-columns: max-content 1fr; gap: var(--s
 dl.details dt { color: var(--text-2); font-size: 13px; }
 dl.details dd { margin: 0; }
 .actions.wrap { flex-wrap: wrap; justify-content: flex-start; }
+
+/* My bookings and admin */
+.mine-row { display: grid; grid-template-columns: 1fr auto; grid-template-areas: 'title action' 'meta action'; gap: 0 var(--s3); padding: var(--s2) 0; border-bottom: 1px solid var(--border); align-items: center; }
+.mine-row .mine-title { grid-area: title; text-align: left; font-weight: 600; }
+.mine-row .muted { grid-area: meta; }
+.mine-row > :is(button.primary, .state) { grid-area: action; }
+.handed { background: var(--accent-soft); border-radius: var(--radius); padding: var(--s3); }
+.handed h3 { color: var(--accent-text); }
