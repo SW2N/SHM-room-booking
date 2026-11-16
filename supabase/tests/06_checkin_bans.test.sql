@@ -34,8 +34,8 @@ sr := tests.val(u, format('select create_series(%L, %L, %L::date, %L::time, %L::
 occ := (sr -> 'created' ->> 0)::uuid;
 return next plan(19);
 
-return next is(tests.ci(u, b1, t0 + interval '9 hours' - interval '61 minutes'), 'CHECKIN_WINDOW', 'too early');
-return next is(tests.ci(u, b1, t0 + interval '9 hours' - interval '60 minutes'), 'ok', 'exactly 1 hour before is fine');
+return next is(tests.ci(u, b1, t0 - interval '1 minute'), 'CHECKIN_WINDOW', 'too early (day before)');
+return next is(tests.ci(u, b1, t0), 'ok', 'from midnight on the day is fine');
 return next is(tests.ci(u, b2, t0 + interval '10 hours' + interval '16 minutes'), 'CHECKIN_WINDOW', 'too late');
 return next is(tests.ci(o, b2, t0 + interval '10 hours'), 'NOT_OWNER', 'only the owner checks in');
 return next is(tests.ci(u, bc, t0 + interval '9 hours'), 'NOT_ACTIVE', 'cannot check in to a cancelled booking');
