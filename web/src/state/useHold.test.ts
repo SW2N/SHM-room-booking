@@ -5,6 +5,7 @@ const api = vi.hoisted(() => ({
   placeHold: vi.fn(),
   renewHold: vi.fn(),
   releaseHold: vi.fn(),
+  releaseHoldOnExit: vi.fn(),
 }))
 vi.mock('../lib/api', () => api)
 import { useHold } from './useHold'
@@ -50,5 +51,22 @@ describe('useHold', () => {
     const { result } = renderHook(() => useHold('KT5-1', S, E))
     await act(async () => {})
     expect(result.current.status).toBe('blocked')
+  })
+
+  it('keeps trying every 10 s while blocked, and holds the slot once it frees up', async () => {
+    api.placeHold.mockRejectedValueOnce({ message: 'ROOM_HELD' })
+    const { result } = renderHook(() => useHold('KT5-1', S, E))
+    await act(async () => {})
+    expect(result.current.status).toBe('blocked')
+    await act(async () => { vi.advanceTimersByTime(10_000) })
+    expect(api.placeHold).toHaveBeenCalledTimes(2)
+    expect(result.current.status).toBe('held')
+  })
+
+  it('releases the hold when the tab is closed or the page is left', async () => {
+    renderHook(() => useHold('KT5-1', S, E))
+    await act(async () => {})
+    window.dispatchEvent(new Event('pagehide'))
+    expect(api.releaseHoldOnExit).toHaveBeenCalledWith('h1')
   })
 })

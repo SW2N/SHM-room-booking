@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { toRule, type RepeatForm } from './recurrence'
+import { defaultRepeat, skipText, toRule, type RepeatForm } from './recurrence'
 
 const f = (p: Partial<RepeatForm>): RepeatForm => ({ kind: 'weekly', interval: 1, weekdays: [2], until: '2027-01-31', ...p })
 
@@ -27,5 +27,21 @@ describe('toRule', () => {
   })
   it('sorts and de-duplicates weekdays', () => {
     expect(toRule(f({ weekdays: [4, 2, 2] }), '2026-11-24')).toMatchObject({ ok: true, rule: { weekdays: [2, 4] } })
+  })
+})
+
+describe('defaultRepeat', () => {
+  it('weekly repeat starts on the first date’s weekday, ending 4 weeks later', () => {
+    expect(defaultRepeat('2026-11-26')).toEqual({ kind: 'none', interval: 1, weekdays: [4], until: '2026-12-24' })
+  })
+})
+
+describe('skipText', () => {
+  const en = { lang: 'en' as const, year: 'CE' as const, format: 'long' as const }
+  it('a month with no such day says so, naming the month', () => {
+    expect(skipText({ date: '2027-02-31', reason: 'BAD_RULE' }, en)).toBe('Feb 2027 · This month has no day 31.')
+  })
+  it('other reasons show the date and the reason', () => {
+    expect(skipText({ date: '2027-01-04', reason: 'HOLIDAY' }, en)).toBe("4 Jan 2027 · Holidays can't be booked.")
   })
 })

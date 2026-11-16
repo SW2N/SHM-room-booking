@@ -110,6 +110,8 @@ const STRINGS = {
   required: { th: 'กรอกข้อมูลนี้', en: 'Fill this in' },
   UNTIL_BEFORE_START: { th: 'วันสิ้นสุดต้องอยู่หลังวันเริ่ม', en: 'The end date must be after the first date.' },
   NO_WEEKDAYS: { th: 'เลือกอย่างน้อย 1 วัน', en: 'Pick at least one day.' },
+  noSuchDay: { th: 'เดือนนี้ไม่มีวันที่ {n}', en: 'This month has no day {n}.' },
+  banCancelled: { th: 'ยกเลิกการจองที่จะถึงของคุณแล้ว {n} รายการ', en: '{n} upcoming bookings were cancelled.' },
   BAD_INTERVAL: { th: 'ใส่ตัวเลขตั้งแต่ 1 ขึ้นไป', en: 'Enter a number from 1 up.' },
 } as const
 

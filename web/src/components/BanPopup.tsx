@@ -10,16 +10,20 @@ type Missed = { name_th: string; name_en: string; title: string; starts_at: stri
 export function BanPopup({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { profile, lang, opts } = useSession()
   const [missed, setMissed] = useState<Missed[]>([])
+  const [cancelled, setCancelled] = useState(0)
 
   useEffect(() => {
     if (!open || !profile) return
     supabase
       .from('bans')
-      .select('missed, ends_at')
+      .select('missed, ends_at, cancelled_count')
       .eq('user_id', profile.id)
       .order('starts_at', { ascending: false })
       .limit(1)
-      .then(({ data }) => setMissed((data?.[0]?.missed as Missed[]) ?? []))
+      .then(({ data }) => {
+        setMissed((data?.[0]?.missed as Missed[]) ?? [])
+        setCancelled((data?.[0]?.cancelled_count as number) ?? 0)
+      })
   }, [open, profile])
 
   if (!profile?.banned_until) return null
@@ -35,6 +39,7 @@ export function BanPopup({ open, onClose }: { open: boolean; onClose: () => void
         ))}
       </ul>
       <p>{t('banImpact', lang)}</p>
+      {cancelled > 0 && <p>{t('banCancelled', lang).replace('{n}', String(cancelled))}</p>}
       <p><strong>{t('banUntil', lang)} {formatDate(bkkDate(until), opts)} {bkkTime(until)}</strong></p>
       <div className="actions">
         <button className="primary" onClick={onClose}>{t('gotIt', lang)}</button>

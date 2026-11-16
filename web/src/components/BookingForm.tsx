@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { createBooking, createSeries, updateBooking, type SeriesResult } from '../lib/api'
-import { addDays, formatDate, SLOTS, toTimestamp } from '../lib/dates'
+import { SLOTS, toTimestamp } from '../lib/dates'
 import { errorMessage } from '../lib/errors'
 import { t } from '../lib/i18n'
-import { toRule, type RepeatForm } from '../lib/recurrence'
+import { defaultRepeat, skipText, toRule, type RepeatForm } from '../lib/recurrence'
 import { roomName } from '../lib/search'
 import { useData } from '../state/data'
 import { useSession } from '../state/session'
@@ -35,7 +35,7 @@ export function BookingForm({ init, onClose, onBanned }: { init: FormInit; onClo
   const [start, setStart] = useState(init.start)
   const [end, setEnd] = useState(init.end)
   const [title, setTitle] = useState(init.title ?? '')
-  const [repeat, setRepeat] = useState<RepeatForm>({ kind: 'none', interval: 1, weekdays: [], until: addDays(init.date, 28) })
+  const [repeat, setRepeat] = useState<RepeatForm>(() => defaultRepeat(init.date))
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [result, setResult] = useState<SeriesResult | null>(null)
@@ -80,7 +80,7 @@ export function BookingForm({ init, onClose, onBanned }: { init: FormInit; onClo
         <p>{t('booked', lang)}: {result.created.length}</p>
         <ul className="plain">
           {result.skipped.map((s) => (
-            <li key={s.date}>{formatDate(s.date, opts)} · {errorMessage(s.reason, lang)}</li>
+            <li key={s.date}>{skipText(s, opts)}</li>
           ))}
         </ul>
         <div className="actions"><button className="primary" onClick={onClose}>{t('close', lang)}</button></div>

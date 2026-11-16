@@ -1,7 +1,7 @@
 import type { EventInput } from '@fullcalendar/core'
 import type { Booking, Hold } from './api'
 import { isLiveHold } from './availability'
-import { bkkDate, bkkTime, type Lang, toTimestamp } from './dates'
+import { addDays, bkkDate, bkkTime, type DateOpts, formatDate, formatMonth, type Lang, toTimestamp, weekdayName } from './dates'
 import { t } from './i18n'
 
 // The calendar runs in "UTC" with Bangkok wall-clock times fed in, so every browser shows Bangkok time
@@ -12,6 +12,21 @@ export function toFloating(iso: string): string {
 export function fromFloating(d: Date): string {
   const s = d.toISOString()
   return toTimestamp(s.slice(0, 10), s.slice(11, 16))
+}
+
+/** "Now" for the calendar: Bangkok's wall-clock time, so Today and the current day are Bangkok's in any browser. */
+export function calendarNow(now: Date = new Date()): string {
+  return toFloating(now.toISOString())
+}
+
+/** The calendar's heading in the person's language and year system: a day, a date range, or a month. */
+export function calendarTitle(start: Date, end: Date | undefined, opts: DateOpts): string {
+  const first = start.toISOString().slice(0, 10)
+  let last = end ? end.toISOString().slice(0, 10) : first
+  if (end && end > start && end.toISOString().slice(11) === '00:00:00.000Z') last = addDays(last, -1)
+  if (last <= first) return `${weekdayName(first, opts.lang)} ${formatDate(first, opts)}`
+  if (first.endsWith('-01') && last.slice(0, 7) === first.slice(0, 7) && addDays(last, 1).endsWith('-01')) return formatMonth(first, opts)
+  return `${formatDate(first, opts)} – ${formatDate(last, opts)}`
 }
 
 const ACTIVE = new Set(['confirmed', 'checked_in'])

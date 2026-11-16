@@ -13,14 +13,13 @@ type BanRow = { user_id: string; ends_at: string; profiles: { display_name: stri
 
 export function AdminPanel({ onClose }: { onClose: () => void }) {
   const { lang, opts } = useSession()
-  const { holidays } = useData()
+  const { holidays, reload } = useData()
   const toast = useToast()
   const [bans, setBans] = useState<BanRow[]>([])
   const [email, setEmail] = useState('')
   const [hDay, setHDay] = useState('')
   const [hTh, setHTh] = useState('')
   const [hEn, setHEn] = useState('')
-  const [holidayList, setHolidayList] = useState(holidays)
 
   const loadBans = useCallback(async () => {
     const { data } = await supabase
@@ -33,7 +32,6 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
   }, [])
 
   useEffect(() => { void loadBans() }, [loadBans])
-  useEffect(() => setHolidayList(holidays), [holidays])
 
   async function act(fn: () => Promise<unknown>, done: string, after?: () => Promise<void> | void) {
     try {
@@ -52,10 +50,6 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
     await act(() => adminRemoveUser(p.id), t('removed', lang), () => setEmail(''))
   }
 
-  async function reloadHolidays() {
-    const { data } = await supabase.from('holidays').select('*').order('day')
-    setHolidayList(data ?? [])
-  }
 
   return (
     <Modal open wide title={t('admin', lang)} onClose={onClose}>
@@ -88,14 +82,14 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
           <input placeholder={t('nameTh', lang)} value={hTh} onChange={(e) => setHTh(e.target.value)} />
           <input placeholder={t('nameEn', lang)} value={hEn} onChange={(e) => setHEn(e.target.value)} />
           <button disabled={!hDay || !hTh.trim()} onClick={() => act(() => addHoliday(hDay, hTh.trim(), hEn.trim()), t('saved', lang), async () => {
-            setHDay(''); setHTh(''); setHEn(''); await reloadHolidays()
+            setHDay(''); setHTh(''); setHEn(''); await reload()
           })}>{t('addHoliday', lang)}</button>
         </div>
         <ul className="plain">
-          {holidayList.filter((h) => h.day >= todayBkk()).map((h) => (
+          {holidays.filter((h) => h.day >= todayBkk()).map((h) => (
             <li key={h.day} className="row">
               <span>{formatDate(h.day, opts)} · {(lang === 'en' && h.name_en) || h.name_th}</span>
-              <button className="link" onClick={() => act(() => deleteHoliday(h.day), t('saved', lang), reloadHolidays)}>{t('delete', lang)}</button>
+              <button className="link" onClick={() => act(() => deleteHoliday(h.day), t('saved', lang), reload)}>{t('delete', lang)}</button>
             </li>
           ))}
         </ul>

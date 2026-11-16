@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Booking, Hold } from './api'
-import { toEvents } from './calendarEvents'
+import { calendarNow, calendarTitle, toEvents } from './calendarEvents'
 
 const b = (id: string, status: Booking['status'], owner = 'other'): Booking =>
   ({ id, room_code: 'KT5-3', starts_at: '2026-11-24T10:00:00+07:00', ends_at: '2026-11-24T11:00:00+07:00', status, title: 'Sales', owner_id: owner, owner_name: 'Nok' }) as Booking
@@ -35,5 +35,30 @@ describe('Bangkok wall-clock conversion for the calendar', () => {
   })
   it('turns a calendar slot back into a Bangkok timestamp', () => {
     expect(fromFloating(new Date('2026-11-24T08:30:00Z'))).toBe('2026-11-24T08:30:00+07:00')
+  })
+})
+
+describe('calendarNow', () => {
+  it("is Bangkok's wall-clock time, so Today is Bangkok's date in any browser", () => {
+    expect(calendarNow(new Date('2026-11-16T20:00:00Z'))).toBe('2026-11-17T03:00:00')
+  })
+})
+
+describe('calendarTitle', () => {
+  const be = { lang: 'th' as const, year: 'BE' as const, format: 'long' as const }
+  const ce = { lang: 'en' as const, year: 'CE' as const, format: 'long' as const }
+  const d = (s: string) => new Date(s)
+  it('a day, in the chosen year and language', () => {
+    expect(calendarTitle(d('2026-11-24T00:00:00Z'), d('2026-11-24T00:00:00Z'), ce)).toBe('Tue 24 Nov 2026')
+    expect(calendarTitle(d('2026-11-24T00:00:00Z'), undefined, be)).toContain('2569')
+  })
+  it('a week, as a range (end given as the last moment of the last day)', () => {
+    expect(calendarTitle(d('2026-11-23T00:00:00Z'), d('2026-11-29T23:59:59.999Z'), ce)).toBe('23 Nov 2026 – 29 Nov 2026')
+  })
+  it('a week, with the end given as the next midnight', () => {
+    expect(calendarTitle(d('2026-11-23T00:00:00Z'), d('2026-11-30T00:00:00Z'), ce)).toBe('23 Nov 2026 – 29 Nov 2026')
+  })
+  it('a month, as the month and year', () => {
+    expect(calendarTitle(d('2026-11-01T00:00:00Z'), d('2026-11-30T23:59:59.999Z'), be)).toBe('พ.ย. 2569')
   })
 })

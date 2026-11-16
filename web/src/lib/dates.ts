@@ -56,6 +56,14 @@ export function formatDate(date: string, opts: DateOpts): string {
   return `${d} ${months[m - 1]} ${year}`
 }
 
+/** A month and year in the chosen language and year system, e.g. "Nov 2026" or "11/2569". */
+export function formatMonth(date: string, opts: DateOpts): string {
+  const [y, m] = date.split('-').map(Number)
+  const year = y + (opts.year === 'BE' ? 543 : 0)
+  if (opts.format === 'numeric') return `${String(m).padStart(2, '0')}/${year}`
+  return `${(opts.lang === 'th' ? TH_MONTHS : EN_MONTHS)[m - 1]} ${year}`
+}
+
 export function weekdayName(date: string, lang: Lang): string {
   const i = isoWeekday(date) % 7
   return (lang === 'th' ? TH_DAYS : EN_DAYS)[i]

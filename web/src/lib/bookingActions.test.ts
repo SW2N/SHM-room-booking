@@ -36,6 +36,19 @@ describe('allowedActions', () => {
     expect(a.edit).toBe('titleEnd')
   })
   it('flags a series', () => {
-    expect(allowedActions(b({ series_id: 's1' }), me, at('2026-11-24T10:00:00+07:00')).isSeries).toBe(true)
+    expect(allowedActions(b({ series_id: 's1', series_owner_id: 'me' }), me, at('2026-11-24T10:00:00+07:00')).isSeries).toBe(true)
+  })
+})
+
+describe('whole-series options', () => {
+  const now = at('2026-11-24T10:00:00+07:00')
+  it('the series owner gets them', () => {
+    expect(allowedActions(b({ series_id: 's1', series_owner_id: 'me' }), me, now).isSeries).toBe(true)
+  })
+  it('someone handed one date of another person’s series does not', () => {
+    expect(allowedActions(b({ series_id: 's1', series_owner_id: 'other' }), me, now).isSeries).toBe(false)
+  })
+  it('an admin does', () => {
+    expect(allowedActions(b({ series_id: 's1', series_owner_id: 'other' }), admin, now).isSeries).toBe(true)
   })
 })

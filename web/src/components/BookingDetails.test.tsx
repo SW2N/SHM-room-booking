@@ -6,7 +6,7 @@ vi.mock('../lib/api', () => api)
 const start = new Date(Date.now() + 5 * 24 * 3600_000)
 vi.mock('../state/data', () => ({
   useData: () => ({
-    bookings: [{ id: 'b3', owner_id: 'me', status: 'confirmed', series_id: 's1', title: 'MM', room_name_en: 'Champ', room_name_th: 'แชมป์', floor: 5,
+    bookings: [{ id: 'b3', owner_id: 'me', status: 'confirmed', series_id: 's1', series_owner_id: 'me', title: 'MM', room_name_en: 'Champ', room_name_th: 'แชมป์', floor: 5,
       owner_name: 'Me', owner_department: null, starts_at: start.toISOString(), ends_at: new Date(start.getTime() + 3600_000).toISOString() }],
     reload: vi.fn(),
   }),

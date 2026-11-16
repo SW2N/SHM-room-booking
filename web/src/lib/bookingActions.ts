@@ -5,7 +5,8 @@ export type Actions = { checkIn: boolean; edit: 'full' | 'titleEnd' | false; can
 
 /** What the person may do with a booking right now — mirrors the back-end rules so buttons only show when they'd work. */
 export function allowedActions(b: Booking, me: { id: string; role: 'user' | 'admin' }, now: Date): Actions {
-  const isSeries = Boolean(b.series_id)
+  // Whole-series actions are for whoever set up the series (or an admin), not someone handed one date of it.
+  const isSeries = Boolean(b.series_id) && (b.series_owner_id === me.id || me.role === 'admin')
   if (b.owner_id !== me.id && me.role !== 'admin') return { checkIn: false, edit: false, cancel: false, handOver: false, isSeries: false }
   const start = new Date(b.starts_at)
   const end = new Date(b.ends_at)

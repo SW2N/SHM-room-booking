@@ -5,7 +5,7 @@ import interactionPlugin from '@fullcalendar/interaction'
 import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import { useEffect, useMemo, useRef } from 'react'
-import { fromFloating, toEvents } from '../lib/calendarEvents'
+import { calendarNow, calendarTitle, fromFloating, toEvents } from '../lib/calendarEvents'
 import { addDays, isoWeekday } from '../lib/dates'
 import { t } from '../lib/i18n'
 import { roomName, type Search } from '../lib/search'
@@ -18,7 +18,7 @@ export function RoomCalendar({ room, search, onSlotClick, onEventClick }: {
   onSlotClick: (startIso: string, endIso: string) => void
   onEventClick: (bookingId: string) => void
 }) {
-  const { lang, profile, isAdmin } = useSession()
+  const { lang, opts, profile, isAdmin } = useSession()
   const { rooms, bookings, holds, holidays, setRange } = useData()
   const ref = useRef<FullCalendar>(null)
   const holidaySet = useMemo(() => new Set(holidays.map((h) => h.day)), [holidays])
@@ -52,6 +52,8 @@ export function RoomCalendar({ room, search, onSlotClick, onEventClick }: {
         initialView="timeGridDay"
         initialDate={search.date}
         timeZone="UTC"
+        now={calendarNow}
+        titleFormat={(a) => calendarTitle(new Date(a.start.marker), a.end ? new Date(a.end.marker) : undefined, opts)}
         locale={lang === 'th' ? thLocale : 'en-gb'}
         headerToolbar={{ left: 'prev,next today', center: 'title', right: 'timeGridDay,timeGridWeek,dayGridMonth' }}
         buttonText={{ today: t('today', lang), day: t('day', lang), week: t('week', lang), month: t('month', lang) }}

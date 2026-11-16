@@ -18,6 +18,8 @@ export type Booking = {
   room_code: string
   owner_id: string
   series_id: string | null
+  /** Who set up the series this booking belongs to; null for a one-off booking. */
+  series_owner_id: string | null
   title: string
   starts_at: string
   ends_at: string
@@ -67,6 +69,26 @@ export const placeHold = (room: string, start: string, end: string, bookingId?: 
   rpc<Hold>('place_hold', { p_room: room, p_starts: start, p_ends: end, p_booking_id: bookingId ?? null })
 export const renewHold = (id: string) => rpc<Hold>('renew_hold', { p_id: id })
 export const releaseHold = (id: string) => rpc<void>('release_hold', { p_id: id })
+// The signed-in person's access token, kept current so a hold can be released while the page is closing,
+// when there is no time to wait for an async lookup.
+let accessToken: string | null = null
+void supabase.auth.getSession().then(({ data }) => { accessToken = data.session?.access_token ?? accessToken })
+supabase.auth.onAuthStateChange((_e, session) => { accessToken = session?.access_token ?? null })
+
+/** Releases a hold as the page closes: a keepalive request outlives the page, unlike a normal one. */
+export function releaseHoldOnExit(id: string) {
+  if (!accessToken) return
+  void fetch(`${import.meta.env.VITE_SUPABASE_URL}/rest/v1/rpc/release_hold`, {
+    method: 'POST',
+    keepalive: true,
+    headers: {
+      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ p_id: id }),
+  }).catch(() => {})
+}
 export const adminLiftBan = (userId: string) => rpc<void>('admin_lift_ban', { p_user: userId })
 export const adminRemoveUser = (userId: string) => rpc<void>('admin_remove_user', { p_user: userId })
 

@@ -82,21 +82,22 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (!error) setHolds((data as Hold[]) ?? [])
   }, [])
 
+  const loadHolidays = useCallback(async () => {
+    const { data, error } = await supabase.from('holidays').select('*').order('day')
+    if (!error) setHolidays((data as Holiday[]) ?? [])
+  }, [])
+
   const reload = useCallback(async () => {
-    await Promise.all([loadBookings(), loadMine(), loadHolds()])
-  }, [loadBookings, loadMine, loadHolds])
+    await Promise.all([loadBookings(), loadMine(), loadHolds(), loadHolidays()])
+  }, [loadBookings, loadMine, loadHolds, loadHolidays])
 
   useEffect(() => {
     if (!session) return
     let alive = true
     ;(async () => {
-      const [r, h] = await Promise.all([
-        supabase.from('rooms').select('*').order('sort'),
-        supabase.from('holidays').select('*').order('day'),
-      ])
+      const r = await supabase.from('rooms').select('*').order('sort')
       if (!alive) return
       setRooms((r.data as Room[]) ?? [])
-      setHolidays((h.data as Holiday[]) ?? [])
       await reload()
       if (alive) setLoading(false)
     })()

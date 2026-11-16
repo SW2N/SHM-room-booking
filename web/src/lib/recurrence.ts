@@ -1,4 +1,7 @@
 import type { Rule } from './api'
+import { addDays, type DateOpts, formatDate, formatMonth, isoWeekday } from './dates'
+import { errorMessage } from './errors'
+import { t } from './i18n'
 
 export type RepeatForm = { kind: 'none' | 'daily' | 'weekly' | 'monthly'; interval: number; weekdays: number[]; until: string }
 export type RuleResult = { ok: true; rule: Rule | null } | { ok: false; error: 'UNTIL_BEFORE_START' | 'NO_WEEKDAYS' | 'BAD_INTERVAL' }
@@ -14,4 +17,17 @@ export function toRule(form: RepeatForm, firstDate: string): RuleResult {
     return { ok: true, rule: { freq: 'weekly', interval: form.interval, weekdays, until: form.until } }
   }
   return { ok: true, rule: { freq: form.kind, interval: form.interval, until: form.until } }
+}
+
+/** The repeat section's starting values: no repeat yet, weekly on the first date's weekday, ending 4 weeks on. */
+export function defaultRepeat(firstDate: string): RepeatForm {
+  return { kind: 'none', interval: 1, weekdays: [isoWeekday(firstDate)], until: addDays(firstDate, 28) }
+}
+
+/** One line for a date a repeat could not book. A monthly repeat from the 29th–31st skips months without that day. */
+export function skipText(s: { date: string; reason: string }, opts: DateOpts): string {
+  const [y, m, d] = s.date.split('-').map(Number)
+  const real = new Date(Date.UTC(y, m - 1, d)).getUTCDate() === d
+  if (!real) return `${formatMonth(s.date, opts)} · ${t('noSuchDay', opts.lang).replace('{n}', String(d))}`
+  return `${formatDate(s.date, opts)} · ${errorMessage(s.reason, opts.lang)}`
 }
