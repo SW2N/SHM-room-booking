@@ -126,3 +126,15 @@ IT support (Exchange admin rights) is not available, so the solution must run wi
 
 1. **Structure first:** Supabase project, database tables, sign-up/sign-in rules, booking rules (no double-booking, 3-month limit, holidays, weekends), check-in/no-show/ban jobs, handover, admin powers, holidays and mock data, and the GitHub repo with automatic publishing.
 2. **Screens second:** the user interface is designed and built in a later step, using the design skills, on top of the finished structure.
+
+## 14. Decisions after the back-end review (16 Nov 2026)
+
+- **Handover choice:** the owner picks *this date only* or *the whole recurring series*. Only the series owner (or an admin) can hand over or cancel a whole series; dates already handed to someone else are left alone.
+- **No handover once a booking has started**, and never to a demo (mock) account.
+- **Handed-over bookings (a + b):** (a) the app must show "handed to you" bookings prominently and call `acknowledge_handovers()` once shown; (b) until then, a missed handed-over booking is released but does **not** count towards a ban.
+- **A ban keeps bookings already checked into**; it cancels only future, not-checked-in bookings. While banned, further misses don't add to the count.
+- **Edits after start:** title and end time can be changed after a booking starts (also when checked in); start time and room cannot.
+- **Ban status is private:** colleagues see only id, email, name, department, role. Each person reads their own full profile with `my_profile()`.
+- **Admin can remove an account** (with its bookings) via `admin_remove_user()` — for someone registered with a colleague's address.
+- **Mock data** must be removed before staff start using the app (it holds real slots and never releases).
+- **First admin:** set by SQL once Sunpawat has an account.
