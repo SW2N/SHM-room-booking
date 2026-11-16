@@ -145,3 +145,10 @@ button.tl-label { border: none; background: none; text-align: left; padding: var
 .tl-block.mine { background: var(--mine); color: var(--mine-text); border-color: #c9bdf2; }
 .tl-block.other { background: var(--other); color: var(--other-text); border-color: #c4d4ec; }
 .tl-block.held { background: var(--held); color: var(--held-text); border: 1px dashed #d9a441; line-height: 26px; }
+
+/* Booking form */
+fieldset.repeat { border: 1px solid var(--border); border-radius: var(--radius); padding: var(--s3); display: flex; flex-direction: column; gap: var(--s2); margin: 0; }
+fieldset.repeat legend { font-size: 13px; color: var(--text-2); padding: 0 var(--s1); }
+label.inline { flex-direction: row; align-items: center; gap: var(--s2); }
+label.inline input { width: 64px; }
+.small { font-size: 12px; }

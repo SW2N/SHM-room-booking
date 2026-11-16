@@ -1,25 +1,34 @@
 import { useEffect, useState } from 'react'
 import { AuthScreen } from './components/AuthScreen'
 import { BanPopup } from './components/BanPopup'
+import { BookingForm, type FormInit } from './components/BookingForm'
 import { DayTimeline } from './components/DayTimeline'
 import { RoomCalendar } from './components/RoomCalendar'
 import { RoomList } from './components/RoomList'
 import { SearchBar } from './components/SearchBar'
 import { SettingsModal } from './components/SettingsModal'
 import { TopBar } from './components/TopBar'
-import { todayBkk } from './lib/dates'
+import { bkkDate, bkkTime, todayBkk } from './lib/dates'
 import { t } from './lib/i18n'
 import { roomsForSearch, type Search } from './lib/search'
 import { useData } from './state/data'
 import { useSession } from './state/session'
 
 export default function App() {
-  const { session, ready, recovering, profile, lang } = useSession()
+  const { session, ready, recovering, profile, lang, refreshProfile } = useSession()
   const { rooms, loading } = useData()
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [banOpen, setBanOpen] = useState(false)
   const [search, setSearch] = useState<Search>(() => ({ date: todayBkk(), start: null, end: null, sizes: [] }))
   const [selected, setSelected] = useState('')
+  const [form, setForm] = useState<FormInit | null>(null)
+
+  const openNew = (room: string, startIso: string, endIso: string) =>
+    setForm({ room, date: bkkDate(startIso), start: bkkTime(startIso), end: bkkTime(endIso), mode: 'new' })
+  const banned = async () => {
+    await refreshProfile()
+    setBanOpen(true)
+  }
 
   useEffect(() => {
     if (profile?.banned_until && new Date(profile.banned_until) > new Date()) setBanOpen(true)
@@ -44,14 +53,17 @@ export default function App() {
           <p className="muted">{t('loading', lang)}</p>
         ) : (
           <div className="section-a">
-            <RoomList search={search} selected={selected} onSelect={setSelected} onBook={() => {}} />
-            {selected && <RoomCalendar room={selected} search={search} onSlotClick={() => {}} onEventClick={() => {}} />}
+            <RoomList search={search} selected={selected} onSelect={setSelected}
+              onBook={(room) => setForm({ room, date: search.date, start: search.start!, end: search.end!, mode: 'new' })} />
+            {selected && <RoomCalendar room={selected} search={search} onSlotClick={(s, e) => openNew(selected, s, e)} onEventClick={() => {}} />}
           </div>
         )}
         {!loading && (
-          <DayTimeline search={search} selected={selected} onSelectRoom={setSelected} onSlotClick={() => {}} onEventClick={() => {}} />
+          <DayTimeline search={search} selected={selected} onSelectRoom={setSelected}
+            onSlotClick={(room, s, e) => { setSelected(room); openNew(room, s, e) }} onEventClick={() => {}} />
         )}
       </main>
+      {form && <BookingForm key={JSON.stringify(form)} init={form} onClose={() => setForm(null)} onBanned={banned} />}
       {settingsOpen && <SettingsModal open onClose={() => setSettingsOpen(false)} />}
       <BanPopup open={banOpen} onClose={() => setBanOpen(false)} />
     </>
