@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { AuthScreen } from './components/AuthScreen'
 import { BanPopup } from './components/BanPopup'
+import { DayTimeline } from './components/DayTimeline'
 import { RoomCalendar } from './components/RoomCalendar'
 import { RoomList } from './components/RoomList'
 import { SearchBar } from './components/SearchBar'
@@ -46,6 +47,9 @@ export default function App() {
             <RoomList search={search} selected={selected} onSelect={setSelected} onBook={() => {}} />
             {selected && <RoomCalendar room={selected} search={search} onSlotClick={() => {}} onEventClick={() => {}} />}
           </div>
+        )}
+        {!loading && (
+          <DayTimeline search={search} selected={selected} onSelectRoom={setSelected} onSlotClick={() => {}} onEventClick={() => {}} />
         )}
       </main>
       {settingsOpen && <SettingsModal open onClose={() => setSettingsOpen(false)} />}
