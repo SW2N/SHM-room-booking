@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { blockPosition, slotAt } from './timeline'
+import { blockPosition, slotAt, hourBand } from './timeline'
 
 describe('timeline', () => {
   it('places 08:00–09:00 at the start', () => {
@@ -20,5 +20,11 @@ describe('timeline', () => {
     expect(slotAt(50)).toBe('14:00')
     expect(slotAt(99.9)).toBe('19:30')
     expect(slotAt(0)).toBe('08:00')
+  })
+})
+
+describe('hourBand', () => {
+  it('alternates by hour: 9:00 light, 10:00 shaded, 11:00 light', () => {
+    expect([8, 9, 10, 11, 19].map(hourBand)).toEqual(['hour-shade', 'hour-light', 'hour-shade', 'hour-light', 'hour-light'])
   })
 })

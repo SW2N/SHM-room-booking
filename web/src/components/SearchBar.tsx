@@ -1,17 +1,16 @@
 import { SLOTS } from '../lib/dates'
+import { DateField } from './DateField'
 import { t } from '../lib/i18n'
 import { SIZES, SIZE_HINT, type Search } from '../lib/search'
 import { useSession } from '../state/session'
 
 export function SearchBar({ search, onChange }: { search: Search; onChange: (s: Search) => void }) {
-  const { lang } = useSession()
+  const { lang, opts } = useSession()
   const set = (patch: Partial<Search>) => onChange({ ...search, ...patch })
   const ends = SLOTS.filter((s) => !search.start || s > search.start)
   return (
     <section className="searchbar panel" aria-label={t('date', lang)}>
-      <label>{t('date', lang)}
-        <input type="date" value={search.date} onChange={(e) => e.target.value && set({ date: e.target.value })} />
-      </label>
+      <DateField label={t('date', lang)} value={search.date} opts={opts} onChange={(date) => set({ date })} />
       <label>{t('start', lang)}
         <select
           value={search.start ?? ''}

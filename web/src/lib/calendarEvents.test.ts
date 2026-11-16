@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Booking, Hold } from './api'
-import { calendarNow, calendarTitle, toEvents } from './calendarEvents'
+import { calendarNow, calendarTitle, toEvents, viewDate } from './calendarEvents'
 
 const b = (id: string, status: Booking['status'], owner = 'other'): Booking =>
   ({ id, room_code: 'KT5-3', starts_at: '2026-11-24T10:00:00+07:00', ends_at: '2026-11-24T11:00:00+07:00', status, title: 'Sales', owner_id: owner, owner_name: 'Nok' }) as Booking
@@ -49,16 +49,28 @@ describe('calendarTitle', () => {
   const ce = { lang: 'en' as const, year: 'CE' as const, format: 'long' as const }
   const d = (s: string) => new Date(s)
   it('a day, in the chosen year and language', () => {
-    expect(calendarTitle(d('2026-11-24T00:00:00Z'), d('2026-11-24T00:00:00Z'), ce)).toBe('Tue 24 Nov 2026')
-    expect(calendarTitle(d('2026-11-24T00:00:00Z'), undefined, be)).toContain('2569')
+    expect(calendarTitle(d('2026-11-24T00:00:00Z'), d('2026-11-24T00:00:00Z'), ce)).toBe('Tue 24-Nov-26')
+    expect(calendarTitle(d('2026-11-24T00:00:00Z'), undefined, be)).toContain('-69')
   })
   it('a week, as a range (end given as the last moment of the last day)', () => {
-    expect(calendarTitle(d('2026-11-23T00:00:00Z'), d('2026-11-29T23:59:59.999Z'), ce)).toBe('23 Nov 2026 – 29 Nov 2026')
+    expect(calendarTitle(d('2026-11-23T00:00:00Z'), d('2026-11-29T23:59:59.999Z'), ce)).toBe('23-Nov-26 – 29-Nov-26')
   })
   it('a week, with the end given as the next midnight', () => {
-    expect(calendarTitle(d('2026-11-23T00:00:00Z'), d('2026-11-30T00:00:00Z'), ce)).toBe('23 Nov 2026 – 29 Nov 2026')
+    expect(calendarTitle(d('2026-11-23T00:00:00Z'), d('2026-11-30T00:00:00Z'), ce)).toBe('23-Nov-26 – 29-Nov-26')
   })
   it('a month, as the month and year', () => {
-    expect(calendarTitle(d('2026-11-01T00:00:00Z'), d('2026-11-30T23:59:59.999Z'), be)).toBe('พ.ย. 2569')
+    expect(calendarTitle(d('2026-11-01T00:00:00Z'), d('2026-11-30T23:59:59.999Z'), be)).toBe('พ.ย.-69')
+  })
+})
+
+describe('viewDate', () => {
+  it('the day view sets the date', () => {
+    expect(viewDate('timeGridDay', '2026-11-18', '2026-11-17', '2026-11-19')).toBe('2026-11-18')
+  })
+  it('week and month views keep the chosen date while it is on screen', () => {
+    expect(viewDate('timeGridWeek', '2026-11-16', '2026-11-18', '2026-11-23')).toBe('2026-11-18')
+  })
+  it('and move it to the first day shown when it is not', () => {
+    expect(viewDate('timeGridWeek', '2026-11-23', '2026-11-18', '2026-11-30')).toBe('2026-11-23')
   })
 })

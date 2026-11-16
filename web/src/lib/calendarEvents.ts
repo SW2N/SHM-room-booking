@@ -29,6 +29,15 @@ export function calendarTitle(start: Date, end: Date | undefined, opts: DateOpts
   return `${formatDate(first, opts)} – ${formatDate(last, opts)}`
 }
 
+/**
+ * The date the rest of the page should show after the calendar moves: the day view's own day, or in week
+ * and month views the chosen date while it is still on screen, otherwise the first day shown.
+ */
+export function viewDate(viewType: string, viewStart: string, current: string, viewEnd: string): string {
+  if (viewType === 'timeGridDay') return viewStart
+  return current >= viewStart && current < viewEnd ? current : viewStart
+}
+
 const ACTIVE = new Set(['confirmed', 'checked_in'])
 
 export function toEvents(roomCode: string, bookings: Booking[], holds: Hold[], myId: string, lang: Lang): EventInput[] {

@@ -48,20 +48,22 @@ export function isoWeekday(date: string): number {
   return d === 0 ? 7 : d
 }
 
+const yy = (year: number) => String(year % 100).padStart(2, '0')
+
+/** The company's two date formats: d-MMM-yy (7-Apr-98, 7-เม.ย.-41) or d/m/yyyy (7/4/1998, 7/4/2541). */
 export function formatDate(date: string, opts: DateOpts): string {
   const [y, m, d] = date.split('-').map(Number)
   const year = y + (opts.year === 'BE' ? 543 : 0)
-  if (opts.format === 'numeric') return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${year}`
-  const months = opts.lang === 'th' ? TH_MONTHS : EN_MONTHS
-  return `${d} ${months[m - 1]} ${year}`
+  if (opts.format === 'numeric') return `${d}/${m}/${year}`
+  return `${d}-${(opts.lang === 'th' ? TH_MONTHS : EN_MONTHS)[m - 1]}-${yy(year)}`
 }
 
-/** A month and year in the chosen language and year system, e.g. "Nov 2026" or "11/2569". */
+/** A month in the same two formats: MMM-yy (Nov-26) or mm/yyyy (11/2569). */
 export function formatMonth(date: string, opts: DateOpts): string {
   const [y, m] = date.split('-').map(Number)
   const year = y + (opts.year === 'BE' ? 543 : 0)
   if (opts.format === 'numeric') return `${String(m).padStart(2, '0')}/${year}`
-  return `${(opts.lang === 'th' ? TH_MONTHS : EN_MONTHS)[m - 1]} ${year}`
+  return `${(opts.lang === 'th' ? TH_MONTHS : EN_MONTHS)[m - 1]}-${yy(year)}`
 }
 
 export function weekdayName(date: string, lang: Lang): string {

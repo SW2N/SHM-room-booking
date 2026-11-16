@@ -5,18 +5,20 @@ import interactionPlugin from '@fullcalendar/interaction'
 import FullCalendar from '@fullcalendar/react'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import { useEffect, useMemo, useRef } from 'react'
-import { calendarNow, calendarTitle, fromFloating, toEvents } from '../lib/calendarEvents'
+import { calendarNow, calendarTitle, fromFloating, toEvents, viewDate } from '../lib/calendarEvents'
 import { addDays, isoWeekday } from '../lib/dates'
 import { t } from '../lib/i18n'
-import { roomName, type Search } from '../lib/search'
+import { buildingTone, roomName, type Search } from '../lib/search'
+import { hourBand } from '../lib/timeline'
 import { useData } from '../state/data'
 import { useSession } from '../state/session'
 
-export function RoomCalendar({ room, search, onSlotClick, onEventClick }: {
+export function RoomCalendar({ room, search, onSlotClick, onEventClick, onDateChange }: {
   room: string
   search: Search
   onSlotClick: (startIso: string, endIso: string) => void
   onEventClick: (bookingId: string) => void
+  onDateChange: (date: string) => void
 }) {
   const { lang, opts, profile, isAdmin } = useSession()
   const { rooms, bookings, holds, holidays, setRange } = useData()
@@ -25,7 +27,12 @@ export function RoomCalendar({ room, search, onSlotClick, onEventClick }: {
   const r = rooms.find((x) => x.code === room)
 
   useEffect(() => {
-    ref.current?.getApi().gotoDate(search.date)
+    const api = ref.current?.getApi()
+    if (!api) return
+    const v = api.view
+    const start = v.currentStart.toISOString().slice(0, 10)
+    const shown = search.date >= start && search.date < v.currentEnd.toISOString().slice(0, 10)
+    if (v.type === 'timeGridDay' ? start !== search.date : !shown) api.gotoDate(search.date)
   }, [search.date])
 
   const events = useMemo<EventInput[]>(() => {
@@ -45,13 +52,21 @@ export function RoomCalendar({ room, search, onSlotClick, onEventClick }: {
 
   return (
     <section className="calendar panel">
-      {r && <h3>{roomName(r, lang)}</h3>}
+      {r && <h3 className={`room-head tone-${buildingTone(r.building)}`}>{roomName(r, lang)} <span>· {r.building === 'Korn Thong' ? t('kornThong', lang) : t('academy', lang)}</span></h3>}
       <FullCalendar
         ref={ref}
         plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
         initialView="timeGridDay"
         initialDate={search.date}
         timeZone="UTC"
+        firstDay={1}
+        dayHeaderFormat={{ weekday: 'short', day: 'numeric', month: 'numeric', omitCommas: true }}
+        views={{
+          timeGridDay: { dayHeaders: false }, // the title already names the day
+          dayGridMonth: { dayHeaderFormat: { weekday: 'short' } },
+        }}
+        slotLaneClassNames={(a) => [hourBand(a.date!.getUTCHours())]}
+        slotLabelClassNames={(a) => [hourBand(a.date.getUTCHours())]}
         now={calendarNow}
         titleFormat={(a) => calendarTitle(new Date(a.start.marker), a.end ? new Date(a.end.marker) : undefined, opts)}
         locale={lang === 'th' ? thLocale : 'en-gb'}
@@ -91,6 +106,8 @@ export function RoomCalendar({ room, search, onSlotClick, onEventClick }: {
         datesSet={(d: DatesSetArg) => {
           const from = d.start.toISOString().slice(0, 10)
           setRange(from, addDays(d.end.toISOString().slice(0, 10), 1))
+          const cur = (x: Date) => x.toISOString().slice(0, 10)
+          onDateChange(viewDate(d.view.type, cur(d.view.currentStart), search.date, cur(d.view.currentEnd)))
         }}
         events={events}
       />

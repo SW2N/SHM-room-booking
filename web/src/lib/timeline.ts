@@ -21,3 +21,8 @@ export function slotAt(xPercent: number): string {
   const i = Math.min(SLOTS.length - 2, Math.max(0, Math.floor((xPercent / 100) * (DAY_LEN / 30))))
   return SLOTS[i]
 }
+
+/** Alternating hour stripes so rows are easy to follow: 9:00 light, 10:00 shaded, 11:00 light, and so on. */
+export function hourBand(hour: number): 'hour-light' | 'hour-shade' {
+  return hour % 2 === 0 ? 'hour-shade' : 'hour-light'
+}

@@ -6,6 +6,7 @@ import { t } from '../lib/i18n'
 import { useData } from '../state/data'
 import { useSession } from '../state/session'
 import { supabase } from '../supabase'
+import { DateField } from './DateField'
 import { Modal } from './Modal'
 import { useToast } from './Toast'
 
@@ -78,7 +79,7 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
       <section className="form">
         <h3>{t('holidays', lang)}</h3>
         <div className="row">
-          <input type="date" value={hDay} onChange={(e) => setHDay(e.target.value)} aria-label={t('date', lang)} />
+          <DateField label={t('date', lang)} value={hDay} opts={opts} onChange={setHDay} />
           <input placeholder={t('nameTh', lang)} value={hTh} onChange={(e) => setHTh(e.target.value)} />
           <input placeholder={t('nameEn', lang)} value={hEn} onChange={(e) => setHEn(e.target.value)} />
           <button disabled={!hDay || !hTh.trim()} onClick={() => act(() => addHoliday(hDay, hTh.trim(), hEn.trim()), t('saved', lang), async () => {

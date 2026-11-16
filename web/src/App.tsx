@@ -29,6 +29,8 @@ export default function App() {
   const [mineOpen, setMineOpen] = useState(false)
   const [adminOpen, setAdminOpen] = useState(false)
   const handedCount = mine.filter((b) => b.handover_unseen).length
+  // One date drives the search bar, the room calendar and the all-rooms view.
+  const setDate = (date: string) => setSearch((s) => (s.date === date ? s : { ...s, date }))
 
   const openNew = (room: string, startIso: string, endIso: string) =>
     setForm({ room, date: bkkDate(startIso), start: bkkTime(startIso), end: bkkTime(endIso), mode: 'new' })
@@ -62,12 +64,13 @@ export default function App() {
           <div className="section-a">
             <RoomList search={search} selected={selected} onSelect={setSelected}
               onBook={(room) => setForm({ room, date: search.date, start: search.start!, end: search.end!, mode: 'new' })} />
-            {selected && <RoomCalendar room={selected} search={search} onSlotClick={(s, e) => openNew(selected, s, e)} onEventClick={setDetails} />}
+            {selected && <RoomCalendar room={selected} search={search} onSlotClick={(s, e) => openNew(selected, s, e)} onEventClick={setDetails}
+              onDateChange={setDate} />}
           </div>
         )}
         {!loading && (
           <DayTimeline search={search} selected={selected} onSelectRoom={setSelected}
-            onSlotClick={(room, s, e) => { setSelected(room); openNew(room, s, e) }} onEventClick={setDetails} />
+            onSlotClick={(room, s, e) => { setSelected(room); openNew(room, s, e) }} onEventClick={setDetails} onDateChange={setDate} />
         )}
       </main>
       {mineOpen && <MyBookings onClose={() => setMineOpen(false)} onOpenBooking={(id) => { setMineOpen(false); setDetails(id) }} />}

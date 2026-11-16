@@ -1,7 +1,7 @@
 import { roomState } from '../lib/availability'
 import { isoWeekday, toTimestamp } from '../lib/dates'
 import { t } from '../lib/i18n'
-import { roomName, roomsForSearch, type Search } from '../lib/search'
+import { buildingTone, roomName, roomsForSearch, type Search } from '../lib/search'
 import { useData } from '../state/data'
 import { useSession } from '../state/session'
 
@@ -31,8 +31,8 @@ export function RoomList({ search, selected, onSelect, onBook }: {
         const list = shown.filter((r) => r.building === b)
         if (!list.length) return null
         return (
-          <div key={b}>
-            <h3>{b === 'Academy' ? (lang === 'th' ? 'อาคาร Academy' : 'Academy') : (lang === 'th' ? 'อาคารกรทอง' : 'Korn Thong')}</h3>
+          <div key={b} className={`building tone-${buildingTone(b)}`}>
+            <h3 className="building-head">{b === 'Academy' ? t('academy', lang) : t('kornThong', lang)}</h3>
             <ul className="rooms">
               {list.map((r) => {
                 const st = state(r.code)

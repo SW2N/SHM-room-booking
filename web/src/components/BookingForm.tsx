@@ -8,6 +8,7 @@ import { roomName } from '../lib/search'
 import { useData } from '../state/data'
 import { useSession } from '../state/session'
 import { useHold } from '../state/useHold'
+import { DateField } from './DateField'
 import { Modal } from './Modal'
 import { useToast } from './Toast'
 
@@ -98,9 +99,7 @@ export function BookingForm({ init, onClose, onBanned }: { init: FormInit; onClo
           </select>
         </label>
         <div className="row">
-          <label>{t('date', lang)}
-            <input type="date" value={date} disabled={locked} onChange={(e) => e.target.value && setDate(e.target.value)} />
-          </label>
+          <DateField label={t('date', lang)} value={date} opts={opts} disabled={locked} onChange={setDate} />
           <label>{t('start', lang)}
             <select value={start} disabled={locked} onChange={(e) => {
               const s = e.target.value
@@ -148,9 +147,7 @@ export function BookingForm({ init, onClose, onBanned }: { init: FormInit; onClo
               </div>
             )}
             {repeat.kind !== 'none' && (
-              <label>{t('until', lang)}
-                <input type="date" value={repeat.until} onChange={(e) => setRepeat({ ...repeat, until: e.target.value })} />
-              </label>
+              <DateField label={t('until', lang)} value={repeat.until} opts={opts} min={date} onChange={(until) => setRepeat({ ...repeat, until })} />
             )}
           </fieldset>
         )}

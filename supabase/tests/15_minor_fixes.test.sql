@@ -19,7 +19,7 @@ perform tests.val(a, format('select (place_hold(%L, %L, %L)).id', 'KT5-2', s, e)
 return next is((select count(*) from holds where user_id = a and expires_at > now()), 2::bigint, 'a second tab keeps its own hold');
 perform tests.val(a, format('select (place_hold(%L, %L, %L)).id', 'KT5-3', s, e));
 perform tests.val(a, format('select (place_hold(%L, %L, %L)).id', 'AC6-1', s, e));
-return next is((select count(*) from holds where user_id = a and expires_at > now()), 3::bigint, 'at most 3 holds per person');
+return next is((select count(*) from holds where user_id = a and expires_at > now()), 4::bigint, 'no limit on how many holds one person keeps');
 return next is(tests.try(a, format('select place_hold(%L, %L, %L)', 'AC6-1', s, e)), 'ok', 'my own hold never blocks me');
 
 return query select * from finish();

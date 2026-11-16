@@ -39,9 +39,9 @@ describe('defaultRepeat', () => {
 describe('skipText', () => {
   const en = { lang: 'en' as const, year: 'CE' as const, format: 'long' as const }
   it('a month with no such day says so, naming the month', () => {
-    expect(skipText({ date: '2027-02-31', reason: 'BAD_RULE' }, en)).toBe('Feb 2027 · This month has no day 31.')
+    expect(skipText({ date: '2027-02-31', reason: 'BAD_RULE' }, en)).toBe('Feb-27 · This month has no day 31.')
   })
   it('other reasons show the date and the reason', () => {
-    expect(skipText({ date: '2027-01-04', reason: 'HOLIDAY' }, en)).toBe("4 Jan 2027 · Holidays can't be booked.")
+    expect(skipText({ date: '2027-01-04', reason: 'HOLIDAY' }, en)).toBe("4-Jan-27 · Holidays can't be booked.")
   })
 })

@@ -12,3 +12,8 @@ export function roomsForSearch(rooms: Room[], search: Search): Room[] {
 export function roomName(r: { name_th: string; name_en: string }, lang: 'th' | 'en'): string {
   return lang === 'th' ? r.name_th : r.name_en
 }
+
+/** Each building's colour: old-money blue for Korn Thong, old-money green for Academy. */
+export function buildingTone(building: string): 'kt' | 'ac' {
+  return building === 'Korn Thong' ? 'kt' : 'ac'
+}

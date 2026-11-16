@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { formatDate } from '../lib/dates'
 import { errorMessage } from '../lib/errors'
 import { t } from '../lib/i18n'
 import { useSession } from '../state/session'
@@ -38,8 +39,9 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
         </label>
         <label>{t('dateFormat', lang)}
           <select value={f} onChange={(e) => setF(e.target.value as 'long' | 'numeric')}>
-            <option value="long">24 พ.ย. 2569</option>
-            <option value="numeric">24/11/2569</option>
+            {/* Examples follow the language and year chosen above. */}
+            <option value="long">{formatDate('1998-04-07', { lang: l, year: y, format: 'long' })}</option>
+            <option value="numeric">{formatDate('1998-04-07', { lang: l, year: y, format: 'numeric' })}</option>
           </select>
         </label>
         <div className="actions">
