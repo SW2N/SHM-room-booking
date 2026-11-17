@@ -6,11 +6,14 @@ import { supabase } from '../supabase'
 
 const PAGE_URL = 'https://sw2n.github.io/SHM-room-booking/'
 type Mode = 'signin' | 'signup' | 'forgot' | 'reset'
+// The last email that signed in on this browser, so it is filled in after signing out.
+const LAST_EMAIL = 'shm-last-email'
+const lastEmail = () => { try { return localStorage.getItem(LAST_EMAIL) ?? '' } catch { return '' } }
 
 export function AuthScreen({ reset }: { reset?: boolean }) {
   const { lang, setGuestLang, doneRecovering } = useSession()
   const [mode, setMode] = useState<Mode>(reset ? 'reset' : 'signin')
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(lastEmail)
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
   const [dept, setDept] = useState('')
@@ -30,6 +33,7 @@ export function AuthScreen({ reset }: { reset?: boolean }) {
       if (mode === 'signin') {
         const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
         if (error) throw error
+        try { localStorage.setItem(LAST_EMAIL, email.trim()) } catch { /* private browsing: nothing to remember */ }
       } else if (mode === 'signup') {
         const { error } = await supabase.auth.signUp({
           email: email.trim(),
@@ -66,7 +70,7 @@ export function AuthScreen({ reset }: { reset?: boolean }) {
         <form onSubmit={submit} noValidate>
           {mode !== 'reset' && (
             <label>{t('email', lang)}
-              <input type="email" autoComplete="email" placeholder="name@sahamitproduct.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <input type="email" autoComplete="username" placeholder="name@sahamitproduct.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </label>
           )}
           {mode !== 'forgot' && (
