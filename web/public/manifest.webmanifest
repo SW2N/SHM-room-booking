@@ -1,14 +1,15 @@
 {
-  "name": "SHM Room Booking · จองห้องประชุม SHM",
-  "short_name": "จองห้อง SHM",
+  "name": "SHMRoom",
+  "short_name": "SHMRoom",
+  "description": "SHM meeting room booking · จองห้องประชุม SHM",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#fafaf8",
+  "background_color": "#ffffff",
   "theme_color": "#22385a",
   "icons": [
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
