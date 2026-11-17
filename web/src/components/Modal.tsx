@@ -5,7 +5,8 @@ export function Modal({ open, title, onClose, children, wide }: {
   title: string
   onClose: () => void
   children: ReactNode
-  wide?: boolean
+  /** true: medium width; 'extra': for wide tables such as the admin panel. */
+  wide?: boolean | 'extra'
 }) {
   useEffect(() => {
     if (!open) return
@@ -16,7 +17,7 @@ export function Modal({ open, title, onClose, children, wide }: {
   if (!open) return null
   return (
     <div className="overlay" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className={wide ? 'modal wide' : 'modal'} role="dialog" aria-modal="true" aria-label={title}>
+      <div className={wide === 'extra' ? 'modal extra-wide' : wide ? 'modal wide' : 'modal'} role="dialog" aria-modal="true" aria-label={title}>
         <div className="modal-head">
           <h2>{title}</h2>
           <button className="icon" aria-label="close" onClick={onClose}>×</button>

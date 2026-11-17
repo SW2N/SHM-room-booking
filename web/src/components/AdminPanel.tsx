@@ -6,6 +6,7 @@ import { t } from '../lib/i18n'
 import { useSession } from '../state/session'
 import { supabase } from '../supabase'
 import { HolidayTable } from './HolidayTable'
+import { UserTable } from './UserTable'
 import { Modal } from './Modal'
 import { useToast } from './Toast'
 
@@ -16,6 +17,7 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
   const toast = useToast()
   const [bans, setBans] = useState<BanRow[]>([])
   const [email, setEmail] = useState('')
+  const [tab, setTab] = useState<'users' | 'holidays' | 'paused'>('users')
 
   const loadBans = useCallback(async () => {
     const { data } = await supabase
@@ -48,30 +50,47 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
 
 
   return (
-    <Modal open wide title={t('admin', lang)} onClose={onClose}>
-      <section>
-        <h3>{t('bannedPeople', lang)}</h3>
-        {bans.length === 0 ? <p className="muted">{t('nobodyBanned', lang)}</p> : (
-          <ul className="plain">
-            {bans.map((b) => (
-              <li key={b.user_id} className="row">
-                <span>{b.profiles?.display_name} · {b.profiles?.email} · {t('banUntil', lang)} {formatDate(bkkDate(b.ends_at), opts)} {bkkTime(b.ends_at)}</span>
-                <button onClick={() => act(() => adminLiftBan(b.user_id), t('saved', lang), loadBans)}>{t('liftBan', lang)}</button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+    <Modal open wide="extra" title={t('admin', lang)} onClose={onClose}>
+      <div className="tabs" role="tablist">
+        {(['users', 'holidays', 'paused'] as const).map((k) => (
+          <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? 'tab active' : 'tab'} onClick={() => setTab(k)}>
+            {t(k === 'users' ? 'users' : k === 'holidays' ? 'holidays' : 'bannedPeople', lang)}
+            {k === 'paused' && bans.length > 0 && <span className="badge">{bans.length}</span>}
+          </button>
+        ))}
+      </div>
 
-      <section className="form">
-        <h3>{t('removeAccount', lang)}</h3>
-        <div className="row">
-          <input type="email" placeholder="name@sahamitproduct.com" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <button className="danger" onClick={remove} disabled={!email.trim()}>{t('removeAccount', lang)}</button>
+      {tab === 'users' && (
+        <div role="tabpanel">
+          <UserTable />
+          <section className="form">
+            <h3>{t('removeAccount', lang)}</h3>
+            <p className="muted small">{t('removeAccountHint', lang)}</p>
+            <div className="row">
+              <input type="email" placeholder="name@sahamitproduct.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+              <button className="danger" onClick={remove} disabled={!email.trim()}>{t('removeAccount', lang)}</button>
+            </div>
+          </section>
         </div>
-      </section>
+      )}
 
-      <HolidayTable />
+      {tab === 'holidays' && <div role="tabpanel"><HolidayTable /></div>}
+
+      {tab === 'paused' && (
+        <section role="tabpanel">
+          <h3>{t('bannedPeople', lang)}</h3>
+          {bans.length === 0 ? <p className="muted">{t('nobodyBanned', lang)}</p> : (
+            <ul className="plain">
+              {bans.map((b) => (
+                <li key={b.user_id} className="row">
+                  <span>{b.profiles?.display_name} · {b.profiles?.email} · {t('banUntil', lang)} {formatDate(bkkDate(b.ends_at), opts)} {bkkTime(b.ends_at)}</span>
+                  <button onClick={() => act(() => adminLiftBan(b.user_id), t('saved', lang), loadBans)}>{t('liftBan', lang)}</button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
     </Modal>
   )
 }

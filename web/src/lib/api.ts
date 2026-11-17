@@ -1,5 +1,6 @@
 // Typed wrappers for every back-end call. Each throws the Supabase error unchanged (see errors.ts for messages).
 import { supabase } from '../supabase'
+import type { StaffEntry, StaffInput } from './staffSheet'
 
 export type Room = {
   code: string
@@ -119,4 +120,16 @@ export async function findProfileByEmail(email: string) {
     .maybeSingle()
   if (error) throw error
   return data
+}
+
+/** Admin: everyone on the staff list, with their account details. */
+export const staffList = () => rpc<StaffEntry[]>('admin_staff_list', {})
+/** Admin: save new or changed people (disabling cancels their upcoming bookings; hand any over first). */
+export const saveStaff = (rows: StaffInput[]) => rpc<number>('admin_save_staff', { p_rows: rows })
+/** Someone's upcoming confirmed bookings (for the review before disabling them). */
+export async function upcomingBookingsOf(userId: string): Promise<Booking[]> {
+  const { data, error } = await supabase.from('booking_details').select('*').eq('owner_id', userId)
+    .eq('status', 'confirmed').gt('starts_at', new Date().toISOString()).order('starts_at')
+  if (error) throw error
+  return (data as Booking[]) ?? []
 }

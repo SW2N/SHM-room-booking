@@ -15,8 +15,6 @@ export function AuthScreen({ reset }: { reset?: boolean }) {
   const [mode, setMode] = useState<Mode>(reset ? 'reset' : 'signin')
   const [email, setEmail] = useState(lastEmail)
   const [password, setPassword] = useState('')
-  const [name, setName] = useState('')
-  const [dept, setDept] = useState('')
   const [error, setError] = useState('')
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
@@ -35,10 +33,13 @@ export function AuthScreen({ reset }: { reset?: boolean }) {
         if (error) throw error
         try { localStorage.setItem(LAST_EMAIL, email.trim()) } catch { /* private browsing: nothing to remember */ }
       } else if (mode === 'signup') {
+        // Only people on the staff list can sign up; say why before trying.
+        const { data: allowed, error: checkErr } = await supabase.rpc('can_sign_up', { p_email: email.trim().toLowerCase() })
+        if (checkErr) throw checkErr
+        if (allowed !== 'ok') throw new Error(allowed as string)
         const { error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
-          options: { data: { display_name: name.trim(), department: dept.trim() } },
         })
         if (error) throw error
       } else if (mode === 'forgot') {
@@ -78,16 +79,7 @@ export function AuthScreen({ reset }: { reset?: boolean }) {
               <input type="password" autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
             </label>
           )}
-          {mode === 'signup' && (
-            <>
-              <label>{t('displayName', lang)}
-                <input value={name} onChange={(e) => setName(e.target.value)} required />
-              </label>
-              <label>{t('department', lang)}
-                <input value={dept} onChange={(e) => setDept(e.target.value)} />
-              </label>
-            </>
-          )}
+          {mode === 'signup' && <p className="muted small">{t('signUpFromList', lang)}</p>}
           {error && <p className="error" role="alert">{error}</p>}
           {note && <p className="note">{note}</p>}
           <button className="primary" type="submit" disabled={busy}>{heading}</button>

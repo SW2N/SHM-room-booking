@@ -99,6 +99,7 @@ ul.plain { list-style: none; padding: 0; margin: var(--s2) 0; display: flex; fle
 .overlay { position: fixed; inset: 0; background: rgba(20, 20, 18, 0.45); display: grid; place-items: center; padding: var(--s4); z-index: 50; }
 .modal { width: min(460px, 100%); max-height: 90vh; overflow: auto; background: var(--surface); border-radius: 12px; border: 1px solid var(--border); }
 .modal.wide { width: min(860px, 100%); }
+.modal.extra-wide { width: min(1120px, 100%); }
 .modal-head { display: flex; justify-content: space-between; align-items: center; padding: var(--s3) var(--s4); border-bottom: 1px solid var(--border); }
 .modal-body { padding: var(--s4); display: flex; flex-direction: column; gap: var(--s3); }
 .modal-body p { margin: 0; }
@@ -264,6 +265,23 @@ dl.details dd { margin: 0; }
 .mine-day .mine-row { padding-left: var(--s2); }
 .handed { background: var(--accent-soft); border-radius: var(--radius); padding: var(--s3); }
 .handed h3 { color: var(--accent-text); }
+
+/* Admin tabs */
+.tabs { display: flex; gap: var(--s1); border-bottom: 1px solid var(--border); margin-bottom: var(--s3); }
+.tabs .tab { border: none; border-bottom: 2px solid transparent; border-radius: 0; background: none; padding: 8px 14px; color: var(--text-2); font-weight: 600; }
+.tabs .tab.active { color: var(--text); border-bottom-color: var(--accent); }
+.tabs .tab .badge { margin-left: 6px; }
+.filters { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; }
+.filters input[type=search] { flex: 1 1 200px; }
+table.sheet.users tr.off td { color: var(--text-3); }
+table.sheet.users td.num { text-align: right; }
+table.sheet .cell-text { display: block; padding: 6px 2px; white-space: nowrap; }
+table.sheet select { width: 100%; min-width: 84px; }
+table.sheet.users td.muted, table.sheet.users th { white-space: nowrap; }
+table.sheet.users td input { min-width: 140px; }
+input[type=checkbox] { width: 18px; height: 18px; min-height: 0; padding: 0; margin: 0; flex: none; accent-color: var(--accent); }
+label.inline { display: flex; flex-direction: row; align-items: center; gap: var(--s2); }
+.review-list li { padding: 4px 0; }
 
 /* Holiday table (admin) */
 label.button-like { position: relative; flex-direction: row; display: inline-flex; align-items: center; cursor: pointer; border: 1px solid var(--border-strong); background: var(--surface); border-radius: var(--radius); padding: 6px 12px; color: var(--text); font-size: 14px; }

@@ -8,6 +8,10 @@ const api = vi.hoisted(() => ({
   adminLiftBan: vi.fn(),
   adminRemoveUser: vi.fn(),
   findProfileByEmail: vi.fn(),
+  staffList: vi.fn().mockResolvedValue([]),
+  saveStaff: vi.fn(),
+  upcomingBookingsOf: vi.fn(),
+  handOver: vi.fn(),
 }))
 vi.mock('../lib/api', () => api)
 const reload = vi.hoisted(() => vi.fn().mockResolvedValue(undefined))
@@ -31,6 +35,7 @@ afterEach(() => { cleanup(); vi.clearAllMocks() })
 describe('AdminPanel holiday table', () => {
   it('editing a name and saving writes only that row, then refreshes the calendars', async () => {
     render(<AdminPanel onClose={() => {}} />)
+    fireEvent.click(screen.getByRole('tab', { name: 'Holidays' }))
     fireEvent.change(screen.getByDisplayValue('Test'), { target: { value: 'New name' } })
     fireEvent.click(screen.getByRole('button', { name: 'Save changes' }))
     await waitFor(() => expect(api.saveHolidays).toHaveBeenCalledWith({ upserts: [{ day: '2099-01-02', name_th: 'ทดสอบ', name_en: 'New name' }], deletes: [] }))
@@ -39,6 +44,7 @@ describe('AdminPanel holiday table', () => {
 
   it('removing a row and saving deletes that holiday', async () => {
     render(<AdminPanel onClose={() => {}} />)
+    fireEvent.click(screen.getByRole('tab', { name: 'Holidays' }))
     fireEvent.click(screen.getByRole('button', { name: 'Remove row' }))
     fireEvent.click(screen.getByRole('button', { name: 'Save changes' }))
     await waitFor(() => expect(api.saveHolidays).toHaveBeenCalledWith({ upserts: [], deletes: ['2099-01-02'] }))
@@ -47,6 +53,7 @@ describe('AdminPanel holiday table', () => {
   it('an uploaded Excel file is added to the table, to check before saving', async () => {
     sheet.readSheet.mockResolvedValue([['Date', 'Thai name', 'English name'], ['3/1/2099', 'วันทดสอบ', 'Test day']])
     render(<AdminPanel onClose={() => {}} />)
+    fireEvent.click(screen.getByRole('tab', { name: 'Holidays' }))
     const file = new File(['x'], 'holidays.xlsx')
     fireEvent.change(screen.getByLabelText('Upload Excel'), { target: { files: [file] } })
     expect(await screen.findByDisplayValue('วันทดสอบ')).toBeTruthy()
@@ -57,10 +64,18 @@ describe('AdminPanel holiday table', () => {
 
   it('the Year filter shows one year at a time', () => {
     render(<AdminPanel onClose={() => {}} />)
+    fireEvent.click(screen.getByRole('tab', { name: 'Holidays' }))
     expect(screen.getByDisplayValue('Test')).toBeTruthy()
     expect(screen.queryByDisplayValue('Next year')).toBeNull()
     fireEvent.change(screen.getByLabelText('Year'), { target: { value: '2100' } })
     expect(screen.getByDisplayValue('Next year')).toBeTruthy()
     expect(screen.queryByDisplayValue('Test')).toBeNull()
+  })
+
+  it('opens on the Users tab, with Holidays and Paused accounts beside it', () => {
+    render(<AdminPanel onClose={() => {}} />)
+    expect(screen.getByRole('tab', { name: 'Users', selected: true })).toBeTruthy()
+    expect(screen.getByRole('tab', { name: 'Holidays' })).toBeTruthy()
+    expect(screen.getByRole('tab', { name: 'Paused accounts' })).toBeTruthy()
   })
 })

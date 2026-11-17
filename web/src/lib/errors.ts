@@ -29,6 +29,16 @@ const MESSAGES: Record<string, { th: string; en: string }> = {
   BAD_RULE: { th: 'การตั้งค่าจองซ้ำไม่ถูกต้อง', en: "The repeat settings aren't valid." },
   HOLD_EXPIRED: { th: 'หมดเวลากันห้องแล้ว (30 นาที) ปิดแล้วเปิดแบบฟอร์มใหม่', en: 'Your 30-minute hold ended. Close and open the form again.' },
   NOT_ALLOWED: { th: 'ทำรายการนี้ไม่ได้', en: "You can't do that." },
+  NOT_ON_STAFF_LIST: {
+    th: 'อีเมลนี้ยังไม่อยู่ในรายชื่อพนักงาน ติดต่อผู้ดูแลระบบเพื่อเพิ่มชื่อ',
+    en: "This email isn't on the staff list yet. Ask an admin to add you.",
+  },
+  ACCOUNT_DISABLED: { th: 'บัญชีนี้ถูกปิดใช้งาน ติดต่อผู้ดูแลระบบ', en: 'This account has been disabled. Contact an admin.' },
+  BAD_DEPARTMENT: { th: 'แผนกไม่อยู่ในรายการ', en: "That department isn't on the list." },
+  BAD_ROLE: { th: 'สิทธิ์ต้องเป็น พนักงาน หรือ ผู้ดูแล', en: 'Role must be Staff or Admin.' },
+  CANNOT_CHANGE_SELF: { th: 'คุณเปลี่ยนสิทธิ์หรือปิดบัญชีของตัวเองไม่ได้', en: "You can't demote or disable your own account." },
+  // Supabase Auth refuses a disabled (banned) account with this message.
+  'User is banned': { th: 'บัญชีนี้ถูกปิดใช้งาน ติดต่อผู้ดูแลระบบ', en: 'This account has been disabled. Contact an admin.' },
   'Invalid login credentials': { th: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง', en: 'Wrong email or password.' },
   'User already registered': { th: 'อีเมลนี้มีบัญชีแล้ว', en: 'That email already has an account.' },
   // The sign-up trigger refusing a non-SHM address reaches the browser as this generic Auth error.
