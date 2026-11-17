@@ -66,7 +66,7 @@ footer { color: var(--text-2); font-size: 13px; text-align: center; padding: 24p
 <header class="hero"><div class="wrap">
 <h1>SHM Meeting Room Booking — User Manual</h1>
 <p>How to find, book and check in to a meeting room.</p>
-<div class="meta">Version 3 · 17 November 2026 · <a href="https://sw2n.github.io/SHM-room-booking/">https://sw2n.github.io/SHM-room-booking/</a></div>
+<div class="meta">Version 4 · 17 November 2026 · <a href="https://sw2n.github.io/SHM-room-booking/">https://sw2n.github.io/SHM-room-booking/</a></div>
 </div></header>
 <main>
 <nav class="toc"><b>Contents</b><ol><li><a href="#start">Getting started</a></li><li><a href="#screen">The main screen</a></li><li><a href="#find">Find a free room</a></li><li><a href="#book">Book a room</a></li><li><a href="#checkin">Check in: important</a></li><li><a href="#change">Change, cancel or hand over</a></li><li><a href="#mine">My bookings</a></li><li><a href="#settings">Settings: language and dates</a></li><li><a href="#phone">On your phone</a></li><li><a href="#admin">For admins</a></li><li><a href="#faq">Questions</a></li></ol></nav><section class="doc" id="start"><h2><span class="num">1.</span>Getting started</h2>
@@ -86,7 +86,7 @@ footer { color: var(--text-2); font-size: 13px; text-align: center; padding: 24p
 <ul>
 <li>You stay signed in on that browser until you press <b>Sign out</b>.</li>
 <li>After signing out, your email is filled in for you next time, and your browser can save the password.</li>
-<li>Forgot your password? Ask an admin to reset it. They give you a temporary password; sign in with it and you'll be asked to choose your own.</li>
+<li>Forgot your password? Press <b>Forgot password</b>, type your email and press <b>Send reset link</b>. An email from "Sahamit Admin" arrives with a link; open it and set a new password. No email after a few minutes? Check Junk, or ask an admin for a temporary password.</li>
 <li>To change your password any time: <b>Settings → Change password</b>.</li>
 </ul>
 </div>
@@ -236,7 +236,7 @@ footer { color: var(--text-2); font-size: 13px; text-align: center; padding: 24p
 <li><b>Departments</b> come from a fixed list: TA, MKT, SCM, HR, ACC, LAW, FOOD, NF, PCB, BD, OTHERS.</li>
 <li><b>Make someone an admin:</b> change their Role to Admin. You can't change your own role or status.</li>
 <li><b>Fix details:</b> correct a name or department someone typed when signing up.</li>
-<li><b>Forgotten password:</b> press <b>Reset password</b> under the person's Account status. A temporary password appears once: give it to them directly, not in a group chat. When they sign in with it, they must choose their own.</li>
+<li><b>Forgotten password (when the reset email didn't arrive):</b> press <b>Reset password</b> under the person's Account status. A temporary password appears once: give it to them directly, not in a group chat. When they sign in with it, they must choose their own.</li>
 <li><b>Someone leaves:</b> set their Status to Disabled. They can no longer sign in, sign up again or book, but their name and history are kept.</li>
 <li>Press <b>Save changes</b>. If someone being disabled has upcoming bookings, you see them first. Tick the ones a colleague should take over and enter that colleague's email; the unticked ones are cancelled.</li>
 </ol>
@@ -258,7 +258,7 @@ footer { color: var(--text-2); font-size: 13px; text-align: center; padding: 24p
 <table>
 <tr><th style="width:40%">Question</th><th>Answer</th></tr>
 <tr><td>I can't create an account.</td><td>Use your <code>@sahamitproduct.com</code> email. If it says the email already has an account, use Forgot password. If it says the account is disabled, contact an admin.</td></tr>
-<tr><td>I forgot my password.</td><td>Ask an admin to reset it. Reset emails aren't sent.</td></tr>
+<tr><td>I forgot my password.</td><td>Use Forgot password on the sign-in page; the link comes from "Sahamit Admin". Nothing arrived? Check Junk, then ask an admin.</td></tr>
 <tr><td>It says my account has been disabled.</td><td>An admin has switched your account off (for example after leaving). Contact an admin if this is a mistake.</td></tr>
 <tr><td>Can I book for my team or my boss?</td><td>Yes. Book it yourself and put their name in the title, or book it and <b>hand it over</b> to them. Whoever owns the booking must check in.</td></tr>
 <tr><td>The time I want is greyed out.</td><td>It's a weekend, a holiday, before now, or more than 3 months ahead. Ask an admin if you really need it.</td></tr>

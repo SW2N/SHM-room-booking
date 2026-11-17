@@ -89,6 +89,7 @@ Everyone sees the same calendar, and it updates live.</p>
 <tr><th>Accounts today</th><td>2 (demo accounts and demo bookings were removed on 17 Nov 2026)</td></tr>
 <tr><th>Cost</th><td>Free: GitHub Pages and the Supabase free plan</td></tr>
 <tr><th>Code</th><td><a href="https://github.com/SW2N/SHM-room-booking">https://github.com/SW2N/SHM-room-booking</a></td></tr>
+<tr><td>17 Nov 2026</td><td>Email connected (custom SMTP, Gmail sahamitadmin@gmail.com, sender "Sahamit Admin"). Forgot password emails a reset link to the person; admin reset stays as the backup.</td></tr>
 </table>
 </div></details>
 <details class="fold"><summary>Why it was built</summary><div class="body">
@@ -175,6 +176,7 @@ Any check-in resets the count.</td></tr>
 <tr><td>Phones</td><td>Same app, laid out for small screens. Admin, Settings and Sign out are in the ☰ menu. Added to the Home Screen it shows as <b>SHMRoom</b> with the round-table icon and opens full-screen.</td></tr>
 <tr><td>Sign-in</td><td>Stays signed in on that browser until Sign out. Remembers the last email, and browsers can save the password. Sign-up: email and password, plus name and department for anyone not on the staff list yet.</td></tr>
 <tr><td>Admin</td><td>Tabs: Users (staff list), Holidays, Paused accounts.</td></tr>
+<tr><td>17 Nov 2026</td><td>Email connected (custom SMTP, Gmail sahamitadmin@gmail.com, sender "Sahamit Admin"). Forgot password emails a reset link to the person; admin reset stays as the backup.</td></tr>
 </table>
 </div></details>
 <details class="fold"><summary>Who can do what<span class="hint">staff vs admin</span></summary><div class="body">
@@ -190,6 +192,7 @@ Any check-in resets the count.</td></tr>
 <tr><td>Change their own password (Settings)</td><td>✓</td><td>✓</td></tr>
 <tr><td>Edit holidays: table, Excel upload/download, Year filter</td><td>—</td><td>✓</td></tr>
 <tr><td>Manage the staff list: add people, set department and role (make admins), disable leavers, Excel upload/download</td><td>—</td><td>✓</td></tr>
+<tr><td>17 Nov 2026</td><td>Email connected (custom SMTP, Gmail sahamitadmin@gmail.com, sender "Sahamit Admin"). Forgot password emails a reset link to the person; admin reset stays as the backup.</td></tr>
 </table>
 </div></details>
 <details class="fold"><summary>How it is built</summary><div class="body">
@@ -232,6 +235,7 @@ Any check-in resets the count.</td></tr>
 <tr><td>Where the rules live</td><td>In the database, not the screens: hours, weekends, holidays, the 3-month limit, no double booking, pauses, holds and permissions.
 Someone who bypasses the web page still can't break a rule.</td></tr>
 <tr><td>Time zone</td><td>Everything runs on Bangkok time (Asia/Bangkok), whatever the computer's own setting.</td></tr>
+<tr><td>17 Nov 2026</td><td>Email connected (custom SMTP, Gmail sahamitadmin@gmail.com, sender "Sahamit Admin"). Forgot password emails a reset link to the person; admin reset stays as the backup.</td></tr>
 </table>
 </div></details>
 <details class="fold"><summary>Data and automatic jobs<span class="hint">for whoever maintains it</span></summary><div class="body">
@@ -276,8 +280,9 @@ Before a disable is saved you see their upcoming bookings to hand over; the rest
 <li><b>Remove an account:</b> Admin → Users → Remove account (for someone who signed up with another person's email; removes their bookings too).</li>
 </ul>
 <h3>Forgotten passwords</h3>
-<p>Admin → Users → <b>Reset password</b> under the person's Account status. A temporary password is shown once, to give to the person directly.
-When they sign in with it, they must choose their own before using the app. The Forgot password link on the sign-in page tells people to ask an admin.</p>
+<p><b>Self-service:</b> Forgot password on the sign-in page emails a reset link to the person's own address, from "Sahamit Admin" &lt;sahamitadmin@gmail.com&gt;. The link brings them back to the app to set a new password.</p>
+<p><b>Backup:</b> Admin → Users → <b>Reset password</b> under the person's Account status. A temporary password is shown once, to give to the person directly.
+When they sign in with it, they must choose their own before using the app. Use this when the email doesn't arrive.</p>
 <h3>Making someone an admin</h3>
 <p>Admin → Users → set their Role to Admin → Save changes. Nobody can demote or disable themselves, so there is always an admin.</p>
 <h3>Changing the system</h3>
@@ -286,12 +291,12 @@ Database changes are migration files in <code>supabase/migrations</code>, with t
 <h3>Free-plan limits to know</h3>
 <ul>
 <li><b>Supabase pauses a free project after 7 days with no use.</b> Daily use prevents this. After a long holiday, open the app once, or resume the project from the Supabase dashboard.</li>
-<li>Supabase's built-in email reaches only the project's own team (about 2 emails an hour), so the app sends no emails. Passwords are reset by an admin instead.</li>
+<li>Email goes through the Gmail account sahamitadmin@gmail.com (custom SMTP in Supabase → Authentication → Emails). Supabase starts custom SMTP at about 30 emails an hour; Gmail allows about 500 a day. Mail from a Gmail address can land in Junk.</li>
 </ul>
 </div></details>
 <details class="fold"><summary>Known limits and ideas for later</summary><div class="body">
 <ul>
-<li><b>No emails at all</b> (no reminders, handover notices or self-service password reset). Connecting an email account (custom SMTP, e.g. a Gmail app password) would allow them later.</li>
+<li><b>Only one kind of email:</b> the password-reset link. No booking reminders or handover notices.</li>
 <li><b>No email confirmation at sign-up</b> (see Security).</li>
 <li><b>Not linked to Outlook.</b> Bookings don't appear in Outlook calendars.</li>
 <li><b>Free hosting.</b> See the free-plan limits above. Paid Supabase removes the 7-day pause.</li>
@@ -309,6 +314,7 @@ Database changes are migration files in <code>supabase/migrations</code>, with t
 <tr><td>17 Nov 2026</td><td>A new or moved booking shows in every view (the page moves to it). My bookings grouped by day, with Check in all.</td></tr>
 <tr><td>17 Nov 2026</td><td>Home Screen icon (round meeting table) and name SHMRoom. Password reset by admins (temporary password, forced change), because the built-in email can't reach staff.</td></tr>
 <tr><td>17 Nov 2026</td><td>User management: staff list with fixed departments. Sign-up first limited to the list, then opened again the same day because it blocked new staff: listed people sign up with email + password, new people give name and department and join the list. Disabling shows upcoming bookings to hand over first, then cancels the rest. Admin panel in tabs. Database tests isolated from live bookings.</td></tr>
+<tr><td>17 Nov 2026</td><td>Email connected (custom SMTP, Gmail sahamitadmin@gmail.com, sender "Sahamit Admin"). Forgot password emails a reset link to the person; admin reset stays as the backup.</td></tr>
 </table>
 </div></details>
 
