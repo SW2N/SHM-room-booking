@@ -29,6 +29,10 @@ const STRINGS = {
     th: 'คุณเข้าสู่ระบบด้วยรหัสผ่านชั่วคราวที่ผู้ดูแลให้มา ตั้งรหัสผ่านใหม่ของคุณเองก่อนใช้งาน',
     en: 'You signed in with a temporary password from an admin. Choose your own password to continue.',
   },
+  askAdminFallback: {
+    th: 'ไม่ได้รับอีเมล? ผู้ดูแลระบบรีเซ็ตรหัสผ่านให้ได้ (ลองดูในโฟลเดอร์อีเมลขยะ/Junk ก่อน)',
+    en: 'No email? An admin can also reset your password. (Check your Junk folder first.)',
+  },
   askAdminReset: {
     th: 'ติดต่อผู้ดูแลระบบเพื่อรีเซ็ตรหัสผ่าน ผู้ดูแลจะให้รหัสผ่านชั่วคราว เมื่อเข้าสู่ระบบแล้วระบบจะให้ตั้งรหัสผ่านใหม่ของคุณเอง',
     en: "Ask an admin to reset your password. They'll give you a temporary one, and after signing in you'll choose your own.",

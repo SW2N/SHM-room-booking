@@ -4,9 +4,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 vi.mock('../state/session', () => ({ useSession: () => ({ lang: 'en', setGuestLang: () => {}, doneRecovering: () => {} }) }))
 const signIn = vi.hoisted(() => vi.fn().mockResolvedValue({ error: null }))
 const signUp = vi.hoisted(() => vi.fn().mockResolvedValue({ error: null }))
-const resetPasswordForEmail = vi.hoisted(() => vi.fn())
+const resetPasswordForEmail = vi.hoisted(() => vi.fn().mockResolvedValue({ error: null }))
+const updateUser = vi.hoisted(() => vi.fn().mockResolvedValue({ error: null }))
 const rpc = vi.hoisted(() => vi.fn().mockResolvedValue({ data: 'listed', error: null }))
-vi.mock('../supabase', () => ({ supabase: { rpc, auth: { signInWithPassword: signIn, signUp, resetPasswordForEmail } } }))
+vi.mock('../supabase', () => ({ supabase: { rpc, auth: { signInWithPassword: signIn, signUp, resetPasswordForEmail, updateUser } } }))
 import { AuthScreen } from './AuthScreen'
 
 beforeEach(() => localStorage.clear())
@@ -80,11 +81,28 @@ describe('AuthScreen sign-up', () => {
 })
 
 describe('AuthScreen forgot password', () => {
-  it('tells people to ask an admin (no email is sent)', () => {
+  it('emails a reset link to the address typed, which comes back to this page', async () => {
+    const { container } = render(<AuthScreen />)
+    fireEvent.click(screen.getByRole('button', { name: 'Forgot password' }))
+    fireEvent.change(container.querySelector('input[type=email]')!, { target: { value: ' ploy@sahamitproduct.com ' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Send reset link' }))
+    await waitFor(() => expect(resetPasswordForEmail).toHaveBeenCalledWith('ploy@sahamitproduct.com', { redirectTo: 'https://sw2n.github.io/SHM-room-booking/' }))
+    expect(await screen.findByText('Check your email for the reset link.')).toBeTruthy()
+    expect(container.querySelector('input[type=password]')).toBeNull()
+  })
+  it('still mentions that an admin can reset it', () => {
     render(<AuthScreen />)
     fireEvent.click(screen.getByRole('button', { name: 'Forgot password' }))
-    expect(screen.getByText(/Ask an admin to reset your password/)).toBeTruthy()
-    expect(document.querySelector('form')).toBeNull()
-    expect(resetPasswordForEmail).not.toHaveBeenCalled()
+    expect(screen.getByText(/No email\? An admin can also reset your password/)).toBeTruthy()
+  })
+})
+
+describe('AuthScreen new password from the email link', () => {
+  it('saves the password and clears any temporary-password flag from an admin reset', async () => {
+    const { container } = render(<AuthScreen reset />)
+    fireEvent.change(container.querySelector('input[type=password]')!, { target: { value: 'newpass1' } })
+    fireEvent.submit(container.querySelector('form')!)
+    await waitFor(() => expect(updateUser).toHaveBeenCalledWith({ password: 'newpass1' }))
+    await waitFor(() => expect(rpc).toHaveBeenCalledWith('password_changed'))
   })
 })

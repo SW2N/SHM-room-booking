@@ -6,6 +6,8 @@ import { useSession } from '../state/session'
 import { supabase } from '../supabase'
 
 type Mode = 'signin' | 'signup' | 'forgot' | 'reset'
+// Where the reset link in the email brings people back to.
+const PAGE_URL = 'https://sw2n.github.io/SHM-room-booking/'
 // The last email that signed in on this browser, so it is filled in after signing out.
 const LAST_EMAIL = 'shm-last-email'
 const lastEmail = () => { try { return localStorage.getItem(LAST_EMAIL) ?? '' } catch { return '' } }
@@ -27,7 +29,7 @@ export function AuthScreen({ reset }: { reset?: boolean }) {
     e.preventDefault()
     setError('')
     setNote('')
-    if (mode === 'signup' && !email.trim().toLowerCase().endsWith('@sahamitproduct.com')) {
+    if ((mode === 'signup' || mode === 'forgot') && !email.trim().toLowerCase().endsWith('@sahamitproduct.com')) {
       return setError(t('shmOnly', lang))
     }
     setBusy(true)
@@ -52,9 +54,16 @@ export function AuthScreen({ reset }: { reset?: boolean }) {
           const { error } = await supabase.auth.signUp({ email: email.trim(), password })
           if (error) throw error
         }
+      } else if (mode === 'forgot') {
+        // Sent by the project's own email account (custom SMTP), to the address the person signed up with.
+        const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), { redirectTo: PAGE_URL })
+        if (error) throw error
+        setNote(t('resetSent', lang))
       } else {
         const { error } = await supabase.auth.updateUser({ password })
         if (error) throw error
+        // A temporary password from an admin no longer applies once the person has chosen their own.
+        await supabase.rpc('password_changed')
         setNote(t('passwordSaved', lang))
         doneRecovering()
       }
@@ -74,16 +83,17 @@ export function AuthScreen({ reset }: { reset?: boolean }) {
           <button className="link" onClick={() => setGuestLang(lang === 'th' ? 'en' : 'th')}>{lang === 'th' ? 'English' : 'ไทย'}</button>
         </div>
         <h2>{heading}</h2>
-        {mode === 'forgot' ? <p className="note">{t('askAdminReset', lang)}</p> : (
         <form onSubmit={submit} noValidate>
           {mode !== 'reset' && (
             <label>{t('email', lang)}
               <input type="email" autoComplete="username" placeholder="name@sahamitproduct.com" value={email} onChange={(e) => { setEmail(e.target.value); setNeedDetails(false) }} required />
             </label>
           )}
-          <label>{mode === 'reset' ? t('newPassword', lang) : t('password', lang)}
-            <input type="password" autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
-          </label>
+          {mode !== 'forgot' && (
+            <label>{mode === 'reset' ? t('newPassword', lang) : t('password', lang)}
+              <input type="password" autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+            </label>
+          )}
           {mode === 'signup' && needDetails && (
             <>
               <p className="note small">{t('tellUsAboutYou', lang)}</p>
@@ -100,9 +110,9 @@ export function AuthScreen({ reset }: { reset?: boolean }) {
           )}
           {error && <p className="error" role="alert">{error}</p>}
           {note && <p className="note">{note}</p>}
-          <button className="primary" type="submit" disabled={busy}>{heading}</button>
+          <button className="primary" type="submit" disabled={busy}>{mode === 'forgot' ? t('sendResetLink', lang) : heading}</button>
         </form>
-        )}
+        {mode === 'forgot' && <p className="muted small">{t('askAdminFallback', lang)}</p>}
         <div className="auth-links">
           {mode === 'signin' && (
             <>
