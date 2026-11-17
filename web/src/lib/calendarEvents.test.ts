@@ -73,6 +73,13 @@ describe('viewDate', () => {
   it('and move it to the first working day shown when it is not (weeks start on Sunday)', () => {
     expect(viewDate('timeGridWeek', '2026-11-22', '2026-11-18', '2026-11-29')).toBe('2026-11-23')
   })
+  it('Today in month view lands on today, not the first of the month', () => {
+    expect(viewDate('dayGridMonth', '2026-11-01', '2026-11-17', '2026-12-01')).toBe('2026-11-17')
+  })
+  it('a weekend date moves to the next weekday, or the last one if the month ends on a weekend', () => {
+    expect(viewDate('dayGridMonth', '2026-11-01', '2026-11-28', '2026-12-01')).toBe('2026-11-30')
+    expect(viewDate('dayGridMonth', '2026-10-01', '2026-10-31', '2026-11-01')).toBe('2026-10-30')
+  })
   it('a month starting on a weekend moves to its first weekday', () => {
     expect(viewDate('dayGridMonth', '2026-11-01', '2026-10-20', '2026-12-01')).toBe('2026-11-02')
   })

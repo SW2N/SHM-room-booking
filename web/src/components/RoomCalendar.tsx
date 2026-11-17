@@ -26,13 +26,12 @@ export function RoomCalendar({ room, search, onSlotClick, onEventClick, onDateCh
   const holidaySet = useMemo(() => new Set(holidays.map((h) => h.day)), [holidays])
   const r = rooms.find((x) => x.code === room)
 
+  // The calendar keeps its own "current date", which decides the day shown when switching views. Keep it equal
+  // to the page's date even when that date is already on screen (e.g. inside the month shown), or switching
+  // from Month to Day would jump back to an old date.
   useEffect(() => {
     const api = ref.current?.getApi()
-    if (!api) return
-    const v = api.view
-    const start = v.currentStart.toISOString().slice(0, 10)
-    const shown = search.date >= start && search.date < v.currentEnd.toISOString().slice(0, 10)
-    if (v.type === 'timeGridDay' ? start !== search.date : !shown) api.gotoDate(search.date)
+    if (api && api.getDate().toISOString().slice(0, 10) !== search.date) api.gotoDate(search.date)
   }, [search.date])
 
   const events = useMemo<EventInput[]>(() => {
@@ -100,6 +99,10 @@ export function RoomCalendar({ room, search, onSlotClick, onEventClick, onDateCh
           ref.current?.getApi().unselect()
           onSlotClick(fromFloating(s.start), fromFloating(s.end))
         }}
+        // Month view has no times to pick: clicking a day opens that day, ready to choose a time.
+        dateClick={(a) => {
+          if (a.view.type === 'dayGridMonth') a.view.calendar.changeView('timeGridDay', a.dateStr.slice(0, 10))
+        }}
         eventClick={(e: EventClickArg) => {
           if (!e.event.id || e.event.id.startsWith('hold-')) return
           onEventClick(e.event.id)
@@ -108,7 +111,7 @@ export function RoomCalendar({ room, search, onSlotClick, onEventClick, onDateCh
           const from = d.start.toISOString().slice(0, 10)
           setRange(from, addDays(d.end.toISOString().slice(0, 10), 1))
           const cur = (x: Date) => x.toISOString().slice(0, 10)
-          onDateChange(viewDate(d.view.type, cur(d.view.currentStart), search.date, cur(d.view.currentEnd)))
+          onDateChange(viewDate(d.view.type, cur(d.view.currentStart), cur(d.view.calendar.getDate()), cur(d.view.currentEnd)))
         }}
         events={events}
       />

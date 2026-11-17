@@ -78,7 +78,9 @@ export default function App() {
       {mineOpen && <MyBookings onClose={() => setMineOpen(false)} onOpenBooking={(id) => { setMineOpen(false); setDetails(id) }} />}
       {adminOpen && <AdminPanel onClose={() => setAdminOpen(false)} />}
       {details && <BookingDetails bookingId={details} onClose={() => setDetails(null)} onEdit={(init) => { setDetails(null); setForm(init) }} />}
-      {form && <BookingForm key={JSON.stringify(form)} init={form} onClose={() => setForm(null)} onBanned={banned} />}
+      {form && <BookingForm key={JSON.stringify(form)} init={form} onClose={() => setForm(null)} onBanned={banned}
+        // Show the new or moved booking everywhere: its room in the calendar, its date in every view.
+        onSaved={(room, date) => { setSelected(room); setDate(date) }} />}
       {settingsOpen && <SettingsModal open onClose={() => setSettingsOpen(false)} />}
       <BanPopup open={banOpen} onClose={() => setBanOpen(false)} />
     </>

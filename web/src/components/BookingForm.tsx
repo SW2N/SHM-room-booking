@@ -26,7 +26,13 @@ export type FormInit = {
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 7]
 const DAY_LABEL = { th: ['จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส', 'อา'], en: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] }
 
-export function BookingForm({ init, onClose, onBanned }: { init: FormInit; onClose: () => void; onBanned: () => void }) {
+export function BookingForm({ init, onClose, onBanned, onSaved }: {
+  init: FormInit
+  onClose: () => void
+  onBanned: () => void
+  /** Called after a successful save with the booking's room and (first) date, so the page can move to it. */
+  onSaved?: (room: string, date: string) => void
+}) {
   const { lang, opts, isAdmin } = useSession()
   const { rooms, reload } = useData()
   const toast = useToast()
@@ -60,11 +66,13 @@ export function BookingForm({ init, onClose, onBanned }: { init: FormInit; onClo
       } else if (rule.rule) {
         const r = await createSeries(room, title.trim(), date, start, end, rule.rule)
         await reload()
+        onSaved?.(room, date)
         if (r.skipped.length) return setResult(r)
       } else {
         await createBooking(room, startIso, endIso, title.trim())
       }
       await reload()
+      if (!rule.rule || init.bookingId) onSaved?.(room, date)
       toast(init.bookingId ? t('saved', lang) : t('booked', lang))
       onClose()
     } catch (e) {

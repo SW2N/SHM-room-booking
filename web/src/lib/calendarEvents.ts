@@ -30,15 +30,17 @@ export function calendarTitle(start: Date, end: Date | undefined, opts: DateOpts
 }
 
 /**
- * The date the rest of the page should show after the calendar moves: the day view's own day, or in week
- * and month views the chosen date while it is still on screen, otherwise the first day shown.
+ * The date the rest of the page should show after the calendar moves. The day view's own day; in week and
+ * month views the calendar's current date (where Today, ‹ › or a view switch put it) while it is on screen,
+ * else the first day shown. A weekend moves to the next weekday shown, or the last one before it.
  */
 export function viewDate(viewType: string, viewStart: string, current: string, viewEnd: string): string {
   if (viewType === 'timeGridDay') return viewStart
-  if (current >= viewStart && current < viewEnd) return current
-  // Weeks start on Sunday and the week view shows working days only, so land on the first weekday.
-  const wd = isoWeekday(viewStart)
-  return wd > 5 ? addDays(viewStart, 8 - wd) : viewStart
+  const day = current >= viewStart && current < viewEnd ? current : viewStart
+  const wd = isoWeekday(day)
+  if (wd <= 5) return day
+  const next = addDays(day, 8 - wd)
+  return next < viewEnd ? next : addDays(day, 5 - wd)
 }
 
 const ACTIVE = new Set(['confirmed', 'checked_in'])
