@@ -4,8 +4,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 vi.mock('../state/session', () => ({ useSession: () => ({ lang: 'en', setGuestLang: () => {}, doneRecovering: () => {} }) }))
 const signIn = vi.hoisted(() => vi.fn().mockResolvedValue({ error: null }))
 const signUp = vi.hoisted(() => vi.fn().mockResolvedValue({ error: null }))
+const resetPasswordForEmail = vi.hoisted(() => vi.fn())
 const rpc = vi.hoisted(() => vi.fn().mockResolvedValue({ data: 'listed', error: null }))
-vi.mock('../supabase', () => ({ supabase: { rpc, auth: { signInWithPassword: signIn, signUp } } }))
+vi.mock('../supabase', () => ({ supabase: { rpc, auth: { signInWithPassword: signIn, signUp, resetPasswordForEmail } } }))
 import { AuthScreen } from './AuthScreen'
 
 beforeEach(() => localStorage.clear())
@@ -75,5 +76,15 @@ describe('AuthScreen sign-up', () => {
     const { container } = render(<AuthScreen />)
     fill(container, 'ta@sahamitproduct.com')
     expect(await screen.findByText(/account has been disabled/)).toBeTruthy()
+  })
+})
+
+describe('AuthScreen forgot password', () => {
+  it('tells people to ask an admin (no email is sent)', () => {
+    render(<AuthScreen />)
+    fireEvent.click(screen.getByRole('button', { name: 'Forgot password' }))
+    expect(screen.getByText(/Ask an admin to reset your password/)).toBeTruthy()
+    expect(document.querySelector('form')).toBeNull()
+    expect(resetPasswordForEmail).not.toHaveBeenCalled()
   })
 })

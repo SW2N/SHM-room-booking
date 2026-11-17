@@ -5,7 +5,6 @@ import { t } from '../lib/i18n'
 import { useSession } from '../state/session'
 import { supabase } from '../supabase'
 
-const PAGE_URL = 'https://sw2n.github.io/SHM-room-booking/'
 type Mode = 'signin' | 'signup' | 'forgot' | 'reset'
 // The last email that signed in on this browser, so it is filled in after signing out.
 const LAST_EMAIL = 'shm-last-email'
@@ -28,7 +27,7 @@ export function AuthScreen({ reset }: { reset?: boolean }) {
     e.preventDefault()
     setError('')
     setNote('')
-    if ((mode === 'signup' || mode === 'forgot') && !email.trim().toLowerCase().endsWith('@sahamitproduct.com')) {
+    if (mode === 'signup' && !email.trim().toLowerCase().endsWith('@sahamitproduct.com')) {
       return setError(t('shmOnly', lang))
     }
     setBusy(true)
@@ -53,10 +52,6 @@ export function AuthScreen({ reset }: { reset?: boolean }) {
           const { error } = await supabase.auth.signUp({ email: email.trim(), password })
           if (error) throw error
         }
-      } else if (mode === 'forgot') {
-        const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: PAGE_URL })
-        if (error) throw error
-        setNote(t('resetSent', lang))
       } else {
         const { error } = await supabase.auth.updateUser({ password })
         if (error) throw error
@@ -79,17 +74,16 @@ export function AuthScreen({ reset }: { reset?: boolean }) {
           <button className="link" onClick={() => setGuestLang(lang === 'th' ? 'en' : 'th')}>{lang === 'th' ? 'English' : 'ไทย'}</button>
         </div>
         <h2>{heading}</h2>
+        {mode === 'forgot' ? <p className="note">{t('askAdminReset', lang)}</p> : (
         <form onSubmit={submit} noValidate>
           {mode !== 'reset' && (
             <label>{t('email', lang)}
               <input type="email" autoComplete="username" placeholder="name@sahamitproduct.com" value={email} onChange={(e) => { setEmail(e.target.value); setNeedDetails(false) }} required />
             </label>
           )}
-          {mode !== 'forgot' && (
-            <label>{mode === 'reset' ? t('newPassword', lang) : t('password', lang)}
-              <input type="password" autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
-            </label>
-          )}
+          <label>{mode === 'reset' ? t('newPassword', lang) : t('password', lang)}
+            <input type="password" autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+          </label>
           {mode === 'signup' && needDetails && (
             <>
               <p className="note small">{t('tellUsAboutYou', lang)}</p>
@@ -108,6 +102,7 @@ export function AuthScreen({ reset }: { reset?: boolean }) {
           {note && <p className="note">{note}</p>}
           <button className="primary" type="submit" disabled={busy}>{heading}</button>
         </form>
+        )}
         <div className="auth-links">
           {mode === 'signin' && (
             <>

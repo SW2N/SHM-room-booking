@@ -133,3 +133,5 @@ export async function upcomingBookingsOf(userId: string): Promise<Booking[]> {
   if (error) throw error
   return (data as Booking[]) ?? []
 }
+/** Admin: give someone a new temporary password (returned once, to pass on). */
+export const adminResetPassword = (email: string) => rpc<string>('admin_reset_password', { p_email: email })

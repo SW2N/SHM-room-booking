@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { readSheet } from 'read-excel-file/browser'
 import writeXlsxFile from 'write-excel-file/browser'
-import { handOver, saveStaff, staffList, upcomingBookingsOf, type Booking } from '../lib/api'
+import { adminResetPassword, handOver, saveStaff, staffList, upcomingBookingsOf, type Booking } from '../lib/api'
 import { bkkDate, bkkTime, formatDate } from '../lib/dates'
 import { DEPARTMENTS } from '../lib/departments'
 import { errorMessage } from '../lib/errors'
@@ -32,6 +32,7 @@ export function UserTable() {
   const [note, setNote] = useState<{ text: string; warn?: boolean }[]>([])
   const [busy, setBusy] = useState(false)
   const [review, setReview] = useState<Review | null>(null)
+  const [temp, setTemp] = useState<{ name: string; email: string; password: string } | null>(null)
   const file = useRef<HTMLInputElement>(null)
   const me = profile?.email?.toLowerCase()
 
@@ -110,6 +111,15 @@ export function UserTable() {
       toast(errorMessage(e, lang), 'error')
     } finally {
       setBusy(false)
+    }
+  }
+
+  async function resetPassword(r: StaffRow) {
+    if (!window.confirm(`${t('resetConfirm', lang)}\n${r.display_name} · ${r.email}`)) return
+    try {
+      setTemp({ name: r.display_name, email: r.email, password: await adminResetPassword(r.email) })
+    } catch (e) {
+      toast(errorMessage(e, lang), 'error')
     }
   }
 
@@ -199,6 +209,9 @@ export function UserTable() {
                   </td>
                   <td className="muted">
                     {r.orig?.has_account ? t('signedUp', lang) : t('notYet', lang)}
+                    {r.orig?.has_account && (
+                      <button className="link small-link" onClick={() => void resetPassword(r)}>{t('resetPassword', lang)}</button>
+                    )}
                     {r.orig?.paused_until && <span className="cell-error">{t('banUntil', lang)} {bkkTime(r.orig.paused_until)}</span>}
                   </td>
                   <td className="muted">{r.orig?.last_sign_in ? formatDate(bkkDate(r.orig.last_sign_in), opts) : '–'}</td>
@@ -215,6 +228,17 @@ export function UserTable() {
         <button disabled={!dirty || busy} onClick={() => { setRows(fromStaff(original)); setNote([]) }}>{t('discard', lang)}</button>
         <button className="primary" disabled={!dirty || hasErrors || busy} onClick={() => void save()}>{t('saveChanges', lang)}</button>
       </div>
+      {temp && (
+        <Modal open title={`${t('tempPasswordTitle', lang)}: ${temp.name}`} onClose={() => setTemp(null)}>
+          <p className="muted small">{temp.email}</p>
+          <div className="temp-password">
+            <code>{temp.password}</code>
+            <button onClick={() => { void navigator.clipboard?.writeText(temp.password); toast(t('copied', lang)) }}>{t('copy', lang)}</button>
+          </div>
+          <p className="muted small">{t('tempPasswordHint', lang)}</p>
+          <div className="actions"><button className="primary" onClick={() => setTemp(null)}>{t('close', lang)}</button></div>
+        </Modal>
+      )}
       {review && (
         <DisableReview review={review} onCancel={() => setReview(null)}
           onConfirm={async (handTo, ids) => {

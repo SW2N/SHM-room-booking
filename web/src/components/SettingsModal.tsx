@@ -4,6 +4,7 @@ import { errorMessage } from '../lib/errors'
 import { t } from '../lib/i18n'
 import { useSession } from '../state/session'
 import { supabase } from '../supabase'
+import { ChangePasswordSection } from './ChangePassword'
 import { Modal } from './Modal'
 import { useToast } from './Toast'
 
@@ -49,6 +50,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
           <button className="primary" onClick={save}>{t('save', lang)}</button>
         </div>
       </div>
+      <ChangePasswordSection />
     </Modal>
   )
 }

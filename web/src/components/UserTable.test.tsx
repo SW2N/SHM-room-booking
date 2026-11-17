@@ -10,6 +10,7 @@ const api = vi.hoisted(() => ({
   saveStaff: vi.fn().mockResolvedValue(1),
   upcomingBookingsOf: vi.fn().mockResolvedValue([]),
   handOver: vi.fn().mockResolvedValue(1),
+  adminResetPassword: vi.fn().mockResolvedValue('Ab3dEfGh2k'),
 }))
 vi.mock('../lib/api', () => api)
 vi.mock('../state/session', () => ({
@@ -79,5 +80,17 @@ describe('UserTable', () => {
     await screen.findByDisplayValue('SW')
     expect((within(rowOf('SW')).getByLabelText('Role') as HTMLSelectElement).disabled).toBe(true)
     expect((within(rowOf('SW')).getByLabelText('Status') as HTMLSelectElement).disabled).toBe(true)
+  })
+
+  it('an admin resets someone\'s password and sees the temporary one to pass on', async () => {
+    api.staffList.mockResolvedValue(LIST)
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    render(<UserTable />)
+    await screen.findByDisplayValue('Ploy')
+    expect(within(rowOf('Nok')).queryByRole('button', { name: 'Reset password' })).toBeNull() // no account yet
+    fireEvent.click(within(rowOf('Ploy')).getByRole('button', { name: 'Reset password' }))
+    await waitFor(() => expect(api.adminResetPassword).toHaveBeenCalledWith('ploy@sahamitproduct.com'))
+    const d = await screen.findByRole('dialog', { name: /Temporary password/ })
+    expect(within(d).getByText('Ab3dEfGh2k')).toBeTruthy()
   })
 })

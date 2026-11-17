@@ -6,6 +6,7 @@ import { BookingDetails } from './components/BookingDetails'
 import { BookingForm, type FormInit } from './components/BookingForm'
 import { DayTimeline } from './components/DayTimeline'
 import { Legend } from './components/Legend'
+import { PasswordGate } from './components/ChangePassword'
 import { MyBookings } from './components/MyBookings'
 import { RoomCalendar } from './components/RoomCalendar'
 import { RoomList } from './components/RoomList'
@@ -78,6 +79,7 @@ export default function App() {
       {mineOpen && <MyBookings onClose={() => setMineOpen(false)} onOpenBooking={(id) => { setMineOpen(false); setDetails(id) }} />}
       {adminOpen && <AdminPanel onClose={() => setAdminOpen(false)} />}
       {details && <BookingDetails bookingId={details} onClose={() => setDetails(null)} onEdit={(init) => { setDetails(null); setForm(init) }} />}
+      <PasswordGate />
       {form && <BookingForm key={JSON.stringify(form)} init={form} onClose={() => setForm(null)} onBanned={banned}
         // Show the new or moved booking everywhere: its room in the calendar, its date in every view.
         onSaved={(room, date) => { setSelected(room); setDate(date) }} />}

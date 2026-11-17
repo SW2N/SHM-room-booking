@@ -6,6 +6,8 @@ import { supabase } from '../supabase'
 export type Profile = {
   id: string
   email: string
+  /** Set after an admin reset: the person must choose their own password before using the app. */
+  must_change_password?: boolean
   display_name: string
   department: string | null
   role: 'user' | 'admin'
