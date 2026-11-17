@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { acknowledgeHandovers, checkIn, type Booking } from '../lib/api'
 import { allowedActions } from '../lib/bookingActions'
-import { formatRange } from '../lib/dates'
+import { addDays, bkkDate, bkkTime, formatDate, todayBkk, weekdayName } from '../lib/dates'
 import { errorMessage } from '../lib/errors'
 import { t } from '../lib/i18n'
 import { useData } from '../state/data'
@@ -39,12 +39,48 @@ export function MyBookings({ onClose, onOpenBooking }: { onClose: () => void; on
     }
   }
 
+  // Check in every booking of today that can still be checked in, in one press at the start of the day.
+  async function checkInAll(list: Booking[]) {
+    const results = await Promise.allSettled(list.map((b) => checkIn(b.id)))
+    await reload()
+    const ok = results.filter((r) => r.status === 'fulfilled').length
+    const failed = results.find((r): r is PromiseRejectedResult => r.status === 'rejected')
+    if (failed) toast(errorMessage(failed.reason, lang), 'error')
+    else toast(t('checkedInAll', lang).replace('{n}', String(ok)))
+  }
+
+  const today = todayBkk()
+  const dayLabel = (d: string) =>
+    `${d === today ? `${t('today', lang)} · ` : d === addDays(today, 1) ? `${t('tomorrow', lang)} · ` : ''}${weekdayName(d, lang)} ${formatDate(d, opts)}`
+  const canCheckIn = (b: Booking) => Boolean(profile && allowedActions(b, profile, now).checkIn)
+
+  // One heading per day that has bookings (no empty days), its meetings underneath in time order.
+  const days = (list: Booking[]) => {
+    const byDay = new Map<string, Booking[]>()
+    for (const b of [...list].sort((x, y) => x.starts_at.localeCompare(y.starts_at))) {
+      const d = bkkDate(b.starts_at)
+      byDay.set(d, [...(byDay.get(d) ?? []), b])
+    }
+    return [...byDay.entries()].map(([d, items]) => {
+      const due = items.filter(canCheckIn)
+      return (
+        <section key={d} className={d === today ? 'mine-day today' : 'mine-day'}>
+          <div className="mine-day-head">
+            <h4>{dayLabel(d)}</h4>
+            {due.length > 1 && <button className="primary" onClick={() => void checkInAll(due)}>{t('checkInAll', lang).replace('{n}', String(due.length))}</button>}
+          </div>
+          <ul className="plain">{items.map(row)}</ul>
+        </section>
+      )
+    })
+  }
+
   const row = (b: Booking) => {
     const can = profile ? allowedActions(b, profile, now) : null
     return (
       <li key={b.id} className="mine-row">
         <button className="link mine-title" onClick={() => onOpenBooking(b.id)}>{b.title}</button>
-        <span className="muted small">{lang === 'th' ? b.room_name_th : b.room_name_en} · {formatRange(b.starts_at, b.ends_at, opts)}</span>
+        <span className="muted small">{bkkTime(b.starts_at)}–{bkkTime(b.ends_at)} · {lang === 'th' ? b.room_name_th : b.room_name_en}</span>
         {b.status === 'checked_in' && <span className="state free">{t('checkedIn', lang)}</span>}
         {can?.checkIn && <button className="primary" onClick={() => doCheckIn(b)}>{t('checkIn', lang)}</button>}
       </li>
@@ -56,12 +92,12 @@ export function MyBookings({ onClose, onOpenBooking }: { onClose: () => void; on
       {handed.length > 0 && (
         <section className="handed">
           <h3>{t('handedToYou', lang)}</h3>
-          <ul className="plain">{handed.map(row)}</ul>
+          {days(handed)}
         </section>
       )}
       <section>
         <h3>{t('upcoming', lang)}</h3>
-        {rest.length ? <ul className="plain">{rest.map(row)}</ul> : <p className="muted">{t('noUpcoming', lang)}</p>}
+        {rest.length ? days(rest) : <p className="muted">{t('noUpcoming', lang)}</p>}
       </section>
     </Modal>
   )

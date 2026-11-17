@@ -256,6 +256,12 @@ dl.details dd { margin: 0; }
 .mine-row .mine-title { grid-area: title; text-align: left; font-weight: 600; }
 .mine-row .muted { grid-area: meta; }
 .mine-row > :is(button.primary, .state) { grid-area: action; }
+.mine-day { margin: var(--s3) 0; }
+.mine-day-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s2); padding: 6px var(--s2); background: var(--surface-2); border-radius: var(--radius); }
+.mine-day-head h4 { margin: 0; font-size: 14px; }
+.mine-day.today .mine-day-head { background: var(--accent-soft); }
+.mine-day.today .mine-day-head h4 { color: var(--accent-text); }
+.mine-day .mine-row { padding-left: var(--s2); }
 .handed { background: var(--accent-soft); border-radius: var(--radius); padding: var(--s3); }
 .handed h3 { color: var(--accent-text); }
 
