@@ -77,14 +77,14 @@ footer { color: var(--text-2); font-size: 13px; text-align: center; padding: 24p
   <div class="stat"><b>9 rooms</b><span>Academy (4) · Korn Thong (5)</span></div>
   <div class="stat"><b>08:00–20:00</b><span>30-minute steps, Monday–Friday</span></div>
   <div class="stat"><b>3 months</b><span>how far ahead staff can book</span></div>
-  <div class="stat"><b>149 + 121</b><span>database tests + screen tests, all passing</span></div>
+  <div class="stat"><b>150 + 122</b><span>database tests + screen tests, all passing</span></div>
 </div>
-<p>A web app that replaces the yearly Excel booking sheet. Anyone on the staff list creates an account with their <code>@sahamitproduct.com</code> email,
+<p>A web app that replaces the yearly Excel booking sheet. Anyone with an <code>@sahamitproduct.com</code> email creates an account,
 finds a free room, and books it. Bookings are confirmed immediately, and two people can never book the same room at the same time.
 Everyone sees the same calendar, and it updates live.</p>
 <table>
 <tr><th style="width:28%">Web address</th><td><a href="https://sw2n.github.io/SHM-room-booking/">https://sw2n.github.io/SHM-room-booking/</a> — the same link every year</td></tr>
-<tr><th>Who can use it</th><td>People on the staff list (kept by admins in Admin → Users). Each person creates their own account with email and password.</td></tr>
+<tr><th>Who can use it</th><td>Everyone at SHM with a company email. Each person creates their own account. Everyone is on the staff list (Admin → Users): added automatically at sign-up, or in advance by an admin.</td></tr>
 <tr><th>Admins</th><td>Sunpawat Wongjumras (SW Admin)</td></tr>
 <tr><th>Accounts today</th><td>2 (demo accounts and demo bookings were removed on 17 Nov 2026)</td></tr>
 <tr><th>Cost</th><td>Free: GitHub Pages and the Supabase free plan</td></tr>
@@ -173,7 +173,7 @@ Any check-in resets the count.</td></tr>
 <tr><td>My bookings</td><td>Upcoming own bookings grouped by day (only days with bookings), <i>Handed to you</i> at the top, Check in and Check in all for today.</td></tr>
 <tr><td>Settings</td><td>Language (TH/EN), year (พ.ศ./ค.ศ.) and date format: <code>7-Apr-98</code> / <code>7-เม.ย.-41</code> or <code>7/4/1998</code> / <code>7/4/2541</code>. Saved per person.</td></tr>
 <tr><td>Phones</td><td>Same app, laid out for small screens. Admin, Settings and Sign out are in the ☰ menu.</td></tr>
-<tr><td>Sign-in</td><td>Stays signed in on that browser until Sign out. Remembers the last email, and browsers can save the password. Sign-up asks only email and password.</td></tr>
+<tr><td>Sign-in</td><td>Stays signed in on that browser until Sign out. Remembers the last email, and browsers can save the password. Sign-up: email and password, plus name and department for anyone not on the staff list yet.</td></tr>
 <tr><td>Admin</td><td>Tabs: Users (staff list), Holidays, Paused accounts.</td></tr>
 </table>
 </div></details>
@@ -243,7 +243,7 @@ Someone who bypasses the web page still can't break a rule.</td></tr>
 <tr><td><code>bans</code></td><td>Pauses: who, why (missed bookings), until when, how many bookings were cancelled, lifted by whom</td></tr>
 <tr><td><code>handovers</code></td><td>Log of every handover</td></tr>
 <tr><td><code>holidays</code></td><td>Public holidays (TH/EN names). 24 listed for 2026–2027 today</td></tr>
-<tr><td><code>staff</code></td><td>The staff list: email, name, department (fixed list), role, active. Gates sign-up; edits are copied to the person's account</td></tr>
+<tr><td><code>staff</code></td><td>The staff list: email, name, department (fixed list), role, active. Fills in details at sign-up, gains everyone who signs up, blocks disabled people; edits are copied to the person's account</td></tr>
 </table>
 <p><b>Views:</b> <code>booking_details</code> (bookings with room and owner names), <code>hold_details</code> (holds with the holder's name).</p>
 <p><b>Main actions</b> (database functions): <code>create_booking</code>, <code>update_booking</code>, <code>cancel_booking</code>, <code>create_series</code>,
@@ -255,13 +255,13 @@ Someone who bypasses the web page still can't break a rule.</td></tr>
 </div></details>
 <details class="fold"><summary>Security</summary><div class="body">
 <ul>
-<li>Only <code>@sahamitproduct.com</code> emails <b>on the staff list</b> can register. This is checked by the database, not only the page.
-The sign-up form can ask whether an email is allowed before signing in (so it can explain a refusal), which reveals whether a company email is on the list.</li>
+<li>Only <code>@sahamitproduct.com</code> emails can register, and disabled people can't. This is checked by the database, not only the page.
+The sign-up form asks before signing in whether an email is already on the list (to skip the name/department step), which reveals whether a company email is listed.</li>
 <li>A disabled account can't sign in, book, hold a slot or receive a handover, and it loses admin powers.</li>
 <li>Every table has row-level security: people can change only their own bookings, and admin powers are checked on the server.</li>
 <li>Pause details are private. Colleagues see only name, email, department and role.</li>
 <li>The repository is public, which free GitHub Pages requires. It holds no secrets: the key in the web page is a public key, and all protection is in the database rules.</li>
-<li>There is no email confirmation at sign-up. If someone registers a listed colleague's address first, an admin removes that account (Admin → Users → Remove account), and the colleague can then sign up.</li>
+<li>There is no email confirmation at sign-up. If someone registers a colleague's address, an admin removes that account (Admin → Users → Remove account), and the colleague can then sign up.</li>
 </ul>
 </div></details>
 <details class="fold"><summary>Running and looking after it<span class="hint">admin tasks, changes, limits</span></summary><div class="body">
@@ -269,7 +269,7 @@ The sign-up form can ask whether an email is allowed before signing in (so it ca
 <ul>
 <li><b>Holidays:</b> Admin → Holidays tab. Edit the table, or Download Excel → edit → Upload Excel → check → Save changes. Use the Year filter to switch years. Add next year's holidays before January.</li>
 <li><b>Lift a pause:</b> Admin → Paused accounts tab → Lift ban.</li>
-<li><b>Staff list:</b> Admin → Users. Add joiners (or upload Excel), change department or role, set leavers to Disabled.
+<li><b>Staff list:</b> Admin → Users. People who sign up appear automatically; you can add joiners in advance (or upload Excel), fix names or departments, change roles, and set leavers to Disabled.
 Before a disable is saved you see their upcoming bookings to hand over; the rest are cancelled.</li>
 <li><b>Remove an account:</b> Admin → Users → Remove account (for someone who signed up with another person's email; removes their bookings too).</li>
 </ul>
@@ -302,7 +302,7 @@ Database changes are migration files in <code>supabase/migrations</code>, with t
 <tr><td>17 Nov 2026</td><td>No limit on held slots per person. Old-money blue (Korn Thong) and green (Academy). Alternating hour stripes. Work week (Mon–Fri). Weeks start on Sunday.</td></tr>
 <tr><td>17 Nov 2026</td><td>Date formats d-MMM-yy and d/m/yyyy. Holidays as an editable table with Excel upload/download and a Year filter. Demo data removed.</td></tr>
 <tr><td>17 Nov 2026</td><td>A new or moved booking shows in every view (the page moves to it). My bookings grouped by day, with Check in all.</td></tr>
-<tr><td>17 Nov 2026</td><td>User management: the staff list gates sign-up (email + password only). Fixed departments. Disabling shows upcoming bookings to hand over first, then cancels the rest. Admin panel in tabs. Database tests isolated from live bookings.</td></tr>
+<tr><td>17 Nov 2026</td><td>User management: staff list with fixed departments. Sign-up first limited to the list, then opened again the same day because it blocked new staff: listed people sign up with email + password, new people give name and department and join the list. Disabling shows upcoming bookings to hand over first, then cancels the rest. Admin panel in tabs. Database tests isolated from live bookings.</td></tr>
 </table>
 </div></details>
 
