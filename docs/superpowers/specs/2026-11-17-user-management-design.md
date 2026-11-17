@@ -8,7 +8,9 @@ download/upload, saved together. Removes the need for SQL to make an admin, and 
 (joiners, leavers, department moves) happen in one place.
 
 ## Decisions (the user's)
-1. **Staff list gates sign-up.** Only emails on the staff list (and active) can create an account.
+1. ~~Staff list gates sign-up.~~ **Changed by the user the same day (12:33):** the gate blocked new staff, so sign-up
+   is open to any company email. People already on the list get their details from it; anyone else gives their name
+   and department while signing up and is added to the list automatically. Disabled people still can't sign up.
 2. **Disabling someone:** the admin first sees that person's upcoming bookings and can hand chosen ones to a
    colleague; the rest are cancelled when the disable is saved.
 3. **Departments are a fixed list:** TA, MKT, SCM, HR, ACC, LAW, FOOD, NF, PCB, BD, OTHERS.
@@ -28,9 +30,10 @@ download/upload, saved together. Removes the need for SQL to make an admin, and 
   set far in the future*), future bookings not handed over are cancelled with reason `account_disabled`, holds
   dropped. `is_admin()` requires an active profile*. Booking, holding and receiving a handover require an active
   account*. Re-enabling clears the sign-in block.
-- Sign-up: the form asks only email + password*; name, department and role come from the staff list.
-  `can_sign_up(email)` (callable before signing in) answers `ok` / `NOT_SHM_EMAIL` / `NOT_ON_STAFF_LIST` /
-  `ACCOUNT_DISABLED` so the form can explain a refusal*; the auth trigger enforces the same rule.
+- Sign-up: `can_sign_up(email)` (callable before signing in) answers `listed` / `new` / `NOT_SHM_EMAIL` /
+  `ACCOUNT_DISABLED`. Listed people sign up with email + password and take their details from the list; new people
+  are then asked for name and department (fixed list) and are added to the staff list as staff*. The auth trigger
+  refuses non-company and disabled emails.
 - `admin_staff_list()` returns every staff row joined with its account: signed up or not, last sign-in,
   upcoming bookings, pause end.
 - `admin_save_staff(rows jsonb)` upserts rows (an upload never deletes*), copies changes to profiles, applies

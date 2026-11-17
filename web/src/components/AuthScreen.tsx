@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { DEPARTMENTS } from '../lib/departments'
 import { errorMessage } from '../lib/errors'
 import { t } from '../lib/i18n'
 import { useSession } from '../state/session'
@@ -14,6 +15,10 @@ export function AuthScreen({ reset }: { reset?: boolean }) {
   const { lang, setGuestLang, doneRecovering } = useSession()
   const [mode, setMode] = useState<Mode>(reset ? 'reset' : 'signin')
   const [email, setEmail] = useState(lastEmail)
+  // Sign-up for someone not on the staff list yet asks for their name and department too.
+  const [needDetails, setNeedDetails] = useState(false)
+  const [name, setName] = useState('')
+  const [dept, setDept] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [note, setNote] = useState('')
@@ -33,15 +38,21 @@ export function AuthScreen({ reset }: { reset?: boolean }) {
         if (error) throw error
         try { localStorage.setItem(LAST_EMAIL, email.trim()) } catch { /* private browsing: nothing to remember */ }
       } else if (mode === 'signup') {
-        // Only people on the staff list can sign up; say why before trying.
-        const { data: allowed, error: checkErr } = await supabase.rpc('can_sign_up', { p_email: email.trim().toLowerCase() })
-        if (checkErr) throw checkErr
-        if (allowed !== 'ok') throw new Error(allowed as string)
-        const { error } = await supabase.auth.signUp({
-          email: email.trim(),
-          password,
-        })
-        if (error) throw error
+        if (needDetails) {
+          if (!name.trim() || !dept) return setError(t('nameDeptRequired', lang))
+          const { error } = await supabase.auth.signUp({
+            email: email.trim(), password, options: { data: { display_name: name.trim(), department: dept } },
+          })
+          if (error) throw error
+        } else {
+          // People already on the staff list get their details from it; anyone new is asked for theirs.
+          const { data: status, error: checkErr } = await supabase.rpc('can_sign_up', { p_email: email.trim().toLowerCase() })
+          if (checkErr) throw checkErr
+          if (status === 'new') return setNeedDetails(true)
+          if (status !== 'listed') throw new Error(status as string)
+          const { error } = await supabase.auth.signUp({ email: email.trim(), password })
+          if (error) throw error
+        }
       } else if (mode === 'forgot') {
         const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: PAGE_URL })
         if (error) throw error
@@ -71,7 +82,7 @@ export function AuthScreen({ reset }: { reset?: boolean }) {
         <form onSubmit={submit} noValidate>
           {mode !== 'reset' && (
             <label>{t('email', lang)}
-              <input type="email" autoComplete="username" placeholder="name@sahamitproduct.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <input type="email" autoComplete="username" placeholder="name@sahamitproduct.com" value={email} onChange={(e) => { setEmail(e.target.value); setNeedDetails(false) }} required />
             </label>
           )}
           {mode !== 'forgot' && (
@@ -79,7 +90,20 @@ export function AuthScreen({ reset }: { reset?: boolean }) {
               <input type="password" autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
             </label>
           )}
-          {mode === 'signup' && <p className="muted small">{t('signUpFromList', lang)}</p>}
+          {mode === 'signup' && needDetails && (
+            <>
+              <p className="note small">{t('tellUsAboutYou', lang)}</p>
+              <label>{t('displayName', lang)}
+                <input value={name} onChange={(e) => setName(e.target.value)} required autoFocus />
+              </label>
+              <label>{t('department', lang)}
+                <select value={dept} onChange={(e) => setDept(e.target.value)} required>
+                  <option value="">{t('chooseDept', lang)}</option>
+                  {DEPARTMENTS.map((d) => <option key={d} value={d}>{d}</option>)}
+                </select>
+              </label>
+            </>
+          )}
           {error && <p className="error" role="alert">{error}</p>}
           {note && <p className="note">{note}</p>}
           <button className="primary" type="submit" disabled={busy}>{heading}</button>

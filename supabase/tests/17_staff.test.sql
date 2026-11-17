@@ -3,7 +3,7 @@ begin
 ad := tests.make_user('ad17@sahamitproduct.com', 'Ad17', true);
 u := tests.make_user('u17@sahamitproduct.com', 'U17');
 s := tests.slot(30, '10:00');
-return next plan(19);
+return next plan(20);
 
 -- Only admins manage the list; values are checked.
 return next is(tests.try(u, $q$select admin_save_staff('[{"email":"x17@sahamitproduct.com","display_name":"X","department":"MKT","role":"user","active":true}]')$q$),
@@ -19,12 +19,15 @@ return next is(tests.try(ad, $q$select admin_save_staff('[{"email":"New17@Sahami
 return next is(tests.val(ad, $q$select has_account::text from admin_staff_list() where email = 'new17@sahamitproduct.com'$q$),
   'false', 'the list shows they have no account yet (email stored in lower case)');
 
--- Sign-up is gated by the list.
-return next is(tests.val(null, $q$select can_sign_up('outsider17@sahamitproduct.com')$q$), 'NOT_ON_STAFF_LIST', 'can_sign_up: not on the list');
-return next is(tests.val(null, $q$select can_sign_up('NEW17@sahamitproduct.com ')$q$), 'ok', 'can_sign_up: on the list (any case, spaces trimmed)');
-return next is(tests.try(null, $q$insert into auth.users (id, instance_id, aud, role, email, created_at, updated_at)
-  values (gen_random_uuid(), '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'outsider17@sahamitproduct.com', now(), now())$q$),
-  'NOT_ON_STAFF_LIST', 'an email not on the list cannot create an account');
+-- Sign-up is open to any company email; the list only fills in details and blocks disabled people.
+return next is(tests.val(null, $q$select can_sign_up('outsider17@sahamitproduct.com')$q$), 'new', 'can_sign_up: not on the list yet is fine (new)');
+return next is(tests.val(null, $q$select can_sign_up('NEW17@sahamitproduct.com ')$q$), 'listed', 'can_sign_up: on the list (any case, spaces trimmed)');
+return next is(tests.try(null, $q$insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, created_at, updated_at)
+  values (gen_random_uuid(), '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'outsider17@sahamitproduct.com',
+          '{"display_name":"Outsider","department":"law"}', now(), now())$q$),
+  'ok', 'someone not on the list can still create an account');
+return next ok((select display_name = 'Outsider' and department = 'LAW' and role = 'user' and active from staff where email = 'outsider17@sahamitproduct.com'),
+  'and they are added to the staff list with the name and department they gave');
 nw := gen_random_uuid();
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, created_at, updated_at)
 values (nw, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'new17@sahamitproduct.com',
