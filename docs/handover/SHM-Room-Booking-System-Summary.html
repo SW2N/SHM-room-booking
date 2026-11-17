@@ -77,14 +77,14 @@ footer { color: var(--text-2); font-size: 13px; text-align: center; padding: 24p
   <div class="stat"><b>9 rooms</b><span>Academy (4) · Korn Thong (5)</span></div>
   <div class="stat"><b>08:00–20:00</b><span>30-minute steps, Monday–Friday</span></div>
   <div class="stat"><b>3 months</b><span>how far ahead staff can book</span></div>
-  <div class="stat"><b>135 + 102</b><span>database tests + screen tests, all passing</span></div>
+  <div class="stat"><b>149 + 121</b><span>database tests + screen tests, all passing</span></div>
 </div>
-<p>A web app that replaces the yearly Excel booking sheet. Anyone with an <code>@sahamitproduct.com</code> email creates an account,
+<p>A web app that replaces the yearly Excel booking sheet. Anyone on the staff list creates an account with their <code>@sahamitproduct.com</code> email,
 finds a free room, and books it. Bookings are confirmed immediately, and two people can never book the same room at the same time.
 Everyone sees the same calendar, and it updates live.</p>
 <table>
 <tr><th style="width:28%">Web address</th><td><a href="https://sw2n.github.io/SHM-room-booking/">https://sw2n.github.io/SHM-room-booking/</a> — the same link every year</td></tr>
-<tr><th>Who can use it</th><td>Everyone at SHM with a company email. Each person creates their own account.</td></tr>
+<tr><th>Who can use it</th><td>People on the staff list (kept by admins in Admin → Users). Each person creates their own account with email and password.</td></tr>
 <tr><th>Admins</th><td>Sunpawat Wongjumras (SW Admin)</td></tr>
 <tr><th>Accounts today</th><td>2 (demo accounts and demo bookings were removed on 17 Nov 2026)</td></tr>
 <tr><th>Cost</th><td>Free: GitHub Pages and the Supabase free plan</td></tr>
@@ -170,10 +170,11 @@ Any check-in resets the count.</td></tr>
 <tr><td>All rooms on this day</td><td>Every room on one timeline, with ‹ Today › buttons. Click an empty spot to book.</td></tr>
 <tr><td>Colour key</td><td>My bookings (solid violet), others' bookings (light blue), being booked (striped amber), closed (hatched).</td></tr>
 <tr><td>Date controls</td><td>The search date, the room calendar and the all-rooms view always show the same day.</td></tr>
-<tr><td>My bookings</td><td>Upcoming own bookings, with <i>Handed to you</i> at the top and Check in buttons for today.</td></tr>
+<tr><td>My bookings</td><td>Upcoming own bookings grouped by day (only days with bookings), <i>Handed to you</i> at the top, Check in and Check in all for today.</td></tr>
 <tr><td>Settings</td><td>Language (TH/EN), year (พ.ศ./ค.ศ.) and date format: <code>7-Apr-98</code> / <code>7-เม.ย.-41</code> or <code>7/4/1998</code> / <code>7/4/2541</code>. Saved per person.</td></tr>
 <tr><td>Phones</td><td>Same app, laid out for small screens. Admin, Settings and Sign out are in the ☰ menu.</td></tr>
-<tr><td>Sign-in</td><td>Stays signed in on that browser until Sign out. Remembers the last email, and browsers can save the password.</td></tr>
+<tr><td>Sign-in</td><td>Stays signed in on that browser until Sign out. Remembers the last email, and browsers can save the password. Sign-up asks only email and password.</td></tr>
+<tr><td>Admin</td><td>Tabs: Users (staff list), Holidays, Paused accounts.</td></tr>
 </table>
 </div></details>
 <details class="fold"><summary>Who can do what<span class="hint">staff vs admin</span></summary><div class="body">
@@ -186,6 +187,7 @@ Any check-in resets the count.</td></tr>
 <tr><td>Lift a pause (ban) early</td><td>—</td><td>✓</td></tr>
 <tr><td>Remove an account (e.g. someone who registered a colleague's email)</td><td>—</td><td>✓</td></tr>
 <tr><td>Edit holidays: table, Excel upload/download, Year filter</td><td>—</td><td>✓</td></tr>
+<tr><td>Manage the staff list: add people, set department and role (make admins), disable leavers, Excel upload/download</td><td>—</td><td>✓</td></tr>
 </table>
 </div></details>
 <details class="fold"><summary>How it is built</summary><div class="body">
@@ -234,39 +236,45 @@ Someone who bypasses the web page still can't break a rule.</td></tr>
 <table>
 <tr><th style="width:24%">Table</th><th>Holds</th></tr>
 <tr><td><code>rooms</code></td><td>The 9 rooms: names (TH/EN), building, floor, seats, size</td></tr>
-<tr><td><code>profiles</code></td><td>One per person: name, department, role, settings, no-show count, pause end</td></tr>
+<tr><td><code>profiles</code></td><td>One per account: name, department, role, active, settings, no-show count, pause end</td></tr>
 <tr><td><code>bookings</code></td><td>Each booking: room, time, title, owner, status (confirmed, checked in, no-show, cancelled), series link</td></tr>
 <tr><td><code>booking_series</code></td><td>Repeat bookings: the rule (daily / weekly / monthly) and its owner</td></tr>
 <tr><td><code>holds</code></td><td>Slots held while a booking form is open</td></tr>
 <tr><td><code>bans</code></td><td>Pauses: who, why (missed bookings), until when, how many bookings were cancelled, lifted by whom</td></tr>
 <tr><td><code>handovers</code></td><td>Log of every handover</td></tr>
 <tr><td><code>holidays</code></td><td>Public holidays (TH/EN names). 24 listed for 2026–2027 today</td></tr>
+<tr><td><code>staff</code></td><td>The staff list: email, name, department (fixed list), role, active. Gates sign-up; edits are copied to the person's account</td></tr>
 </table>
 <p><b>Views:</b> <code>booking_details</code> (bookings with room and owner names), <code>hold_details</code> (holds with the holder's name).</p>
 <p><b>Main actions</b> (database functions): <code>create_booking</code>, <code>update_booking</code>, <code>cancel_booking</code>, <code>create_series</code>,
 <code>cancel_series</code>, <code>check_in</code>, <code>hand_over</code>, <code>acknowledge_handovers</code>, <code>place_hold</code> / <code>renew_hold</code> / <code>release_hold</code>,
-<code>my_profile</code>, <code>update_my_settings</code>, <code>admin_lift_ban</code>, <code>admin_remove_user</code>, <code>process_no_shows</code>.</p>
+<code>my_profile</code>, <code>update_my_settings</code>, <code>admin_lift_ban</code>, <code>admin_remove_user</code>, <code>process_no_shows</code>,
+<code>can_sign_up</code>, <code>admin_staff_list</code>, <code>admin_save_staff</code>.</p>
+<p><b>Departments</b> (fixed): TA, MKT, SCM, HR, ACC, LAW, FOOD, NF, PCB, BD, OTHERS.</p>
 <p><b>Timed jobs</b> (every 5 minutes): <code>process-no-shows</code> (no-shows, pauses, ending pauses) and <code>purge-holds</code> (clears lapsed holds).</p>
 </div></details>
 <details class="fold"><summary>Security</summary><div class="body">
 <ul>
-<li>Only <code>@sahamitproduct.com</code> emails can register. This is checked by the database, not only the page.</li>
+<li>Only <code>@sahamitproduct.com</code> emails <b>on the staff list</b> can register. This is checked by the database, not only the page.
+The sign-up form can ask whether an email is allowed before signing in (so it can explain a refusal), which reveals whether a company email is on the list.</li>
+<li>A disabled account can't sign in, book, hold a slot or receive a handover, and it loses admin powers.</li>
 <li>Every table has row-level security: people can change only their own bookings, and admin powers are checked on the server.</li>
 <li>Pause details are private. Colleagues see only name, email, department and role.</li>
 <li>The repository is public, which free GitHub Pages requires. It holds no secrets: the key in the web page is a public key, and all protection is in the database rules.</li>
-<li>There is no email confirmation at sign-up. If someone registers a colleague's address, an admin removes that account.</li>
+<li>There is no email confirmation at sign-up. If someone registers a listed colleague's address first, an admin removes that account (Admin → Users → Remove account), and the colleague can then sign up.</li>
 </ul>
 </div></details>
 <details class="fold"><summary>Running and looking after it<span class="hint">admin tasks, changes, limits</span></summary><div class="body">
 <h3>Everyday admin tasks (in the app)</h3>
 <ul>
-<li><b>Holidays:</b> Admin → Holidays. Edit the table, or Download Excel → edit → Upload Excel → check → Save changes. Use the Year filter to switch years. Add next year's holidays before January.</li>
-<li><b>Lift a pause:</b> Admin → Paused accounts → Lift ban.</li>
-<li><b>Remove an account:</b> Admin → Remove account → enter the email (removes their bookings too).</li>
+<li><b>Holidays:</b> Admin → Holidays tab. Edit the table, or Download Excel → edit → Upload Excel → check → Save changes. Use the Year filter to switch years. Add next year's holidays before January.</li>
+<li><b>Lift a pause:</b> Admin → Paused accounts tab → Lift ban.</li>
+<li><b>Staff list:</b> Admin → Users. Add joiners (or upload Excel), change department or role, set leavers to Disabled.
+Before a disable is saved you see their upcoming bookings to hand over; the rest are cancelled.</li>
+<li><b>Remove an account:</b> Admin → Users → Remove account (for someone who signed up with another person's email; removes their bookings too).</li>
 </ul>
 <h3>Making someone an admin</h3>
-<p>There's no button for this yet. In the Supabase dashboard → SQL editor, run:</p>
-<pre>update public.profiles set role = 'admin' where email = 'name@sahamitproduct.com';</pre>
+<p>Admin → Users → set their Role to Admin → Save changes. Nobody can demote or disable themselves, so there is always an admin.</p>
 <h3>Changing the system</h3>
 <p>Code changes go to the GitHub repository. Each push to <code>main</code> runs the build, and the site updates about a minute later.
 Database changes are migration files in <code>supabase/migrations</code>, with tests in <code>supabase/tests</code>.</p>
@@ -280,7 +288,6 @@ Database changes are migration files in <code>supabase/migrations</code>, with t
 <ul>
 <li><b>No email or calendar notifications</b> yet (reminders, handover notices). They can be added later with an email service.</li>
 <li><b>No email confirmation at sign-up</b> (see Security).</li>
-<li><b>Admin role</b> is given by SQL, not in the app.</li>
 <li><b>Not linked to Outlook.</b> Bookings don't appear in Outlook calendars.</li>
 <li><b>Free hosting.</b> See the free-plan limits above. Paid Supabase removes the 7-day pause.</li>
 </ul>
@@ -294,6 +301,8 @@ Database changes are migration files in <code>supabase/migrations</code>, with t
 <tr><td>16 Nov 2026</td><td>Screens: search by time first or by room first. Room list on top and the all-rooms timeline below. Clean neutral style. Live updates and slot holds.</td></tr>
 <tr><td>17 Nov 2026</td><td>No limit on held slots per person. Old-money blue (Korn Thong) and green (Academy). Alternating hour stripes. Work week (Mon–Fri). Weeks start on Sunday.</td></tr>
 <tr><td>17 Nov 2026</td><td>Date formats d-MMM-yy and d/m/yyyy. Holidays as an editable table with Excel upload/download and a Year filter. Demo data removed.</td></tr>
+<tr><td>17 Nov 2026</td><td>A new or moved booking shows in every view (the page moves to it). My bookings grouped by day, with Check in all.</td></tr>
+<tr><td>17 Nov 2026</td><td>User management: the staff list gates sign-up (email + password only). Fixed departments. Disabling shows upcoming bookings to hand over first, then cancels the rest. Admin panel in tabs. Database tests isolated from live bookings.</td></tr>
 </table>
 </div></details>
 
