@@ -77,7 +77,7 @@ footer { color: var(--text-2); font-size: 13px; text-align: center; padding: 24p
   <div class="stat"><b>9 rooms</b><span>Academy (4) · Korn Thong (5)</span></div>
   <div class="stat"><b>08:00–20:00</b><span>30-minute steps, Monday–Friday</span></div>
   <div class="stat"><b>3 months</b><span>how far ahead staff can book</span></div>
-  <div class="stat"><b>150 + 122</b><span>database tests + screen tests, all passing</span></div>
+  <div class="stat"><b>156 + 128</b><span>database tests + screen tests, all passing</span></div>
 </div>
 <p>A web app that replaces the yearly Excel booking sheet. Anyone with an <code>@sahamitproduct.com</code> email creates an account,
 finds a free room, and books it. Bookings are confirmed immediately, and two people can never book the same room at the same time.
@@ -172,7 +172,7 @@ Any check-in resets the count.</td></tr>
 <tr><td>Date controls</td><td>The search date, the room calendar and the all-rooms view always show the same day.</td></tr>
 <tr><td>My bookings</td><td>Upcoming own bookings grouped by day (only days with bookings), <i>Handed to you</i> at the top, Check in and Check in all for today.</td></tr>
 <tr><td>Settings</td><td>Language (TH/EN), year (พ.ศ./ค.ศ.) and date format: <code>7-Apr-98</code> / <code>7-เม.ย.-41</code> or <code>7/4/1998</code> / <code>7/4/2541</code>. Saved per person.</td></tr>
-<tr><td>Phones</td><td>Same app, laid out for small screens. Admin, Settings and Sign out are in the ☰ menu.</td></tr>
+<tr><td>Phones</td><td>Same app, laid out for small screens. Admin, Settings and Sign out are in the ☰ menu. Added to the Home Screen it shows as <b>SHMRoom</b> with the round-table icon and opens full-screen.</td></tr>
 <tr><td>Sign-in</td><td>Stays signed in on that browser until Sign out. Remembers the last email, and browsers can save the password. Sign-up: email and password, plus name and department for anyone not on the staff list yet.</td></tr>
 <tr><td>Admin</td><td>Tabs: Users (staff list), Holidays, Paused accounts.</td></tr>
 </table>
@@ -186,6 +186,8 @@ Any check-in resets the count.</td></tr>
 <tr><td>Book weekends, holidays, or more than 3 months ahead</td><td>—</td><td>✓</td></tr>
 <tr><td>Lift a pause (ban) early</td><td>—</td><td>✓</td></tr>
 <tr><td>Remove an account (e.g. someone who registered a colleague's email)</td><td>—</td><td>✓</td></tr>
+<tr><td>Reset someone's password (temporary password)</td><td>—</td><td>✓</td></tr>
+<tr><td>Change their own password (Settings)</td><td>✓</td><td>✓</td></tr>
 <tr><td>Edit holidays: table, Excel upload/download, Year filter</td><td>—</td><td>✓</td></tr>
 <tr><td>Manage the staff list: add people, set department and role (make admins), disable leavers, Excel upload/download</td><td>—</td><td>✓</td></tr>
 </table>
@@ -273,6 +275,9 @@ The sign-up form asks before signing in whether an email is already on the list 
 Before a disable is saved you see their upcoming bookings to hand over; the rest are cancelled.</li>
 <li><b>Remove an account:</b> Admin → Users → Remove account (for someone who signed up with another person's email; removes their bookings too).</li>
 </ul>
+<h3>Forgotten passwords</h3>
+<p>Admin → Users → <b>Reset password</b> under the person's Account status. A temporary password is shown once, to give to the person directly.
+When they sign in with it, they must choose their own before using the app. The Forgot password link on the sign-in page tells people to ask an admin.</p>
 <h3>Making someone an admin</h3>
 <p>Admin → Users → set their Role to Admin → Save changes. Nobody can demote or disable themselves, so there is always an admin.</p>
 <h3>Changing the system</h3>
@@ -281,12 +286,12 @@ Database changes are migration files in <code>supabase/migrations</code>, with t
 <h3>Free-plan limits to know</h3>
 <ul>
 <li><b>Supabase pauses a free project after 7 days with no use.</b> Daily use prevents this. After a long holiday, open the app once, or resume the project from the Supabase dashboard.</li>
-<li>Password-reset emails use Supabase's built-in email, which allows only a few emails per hour. That's fine for occasional resets.</li>
+<li>Supabase's built-in email reaches only the project's own team (about 2 emails an hour), so the app sends no emails. Passwords are reset by an admin instead.</li>
 </ul>
 </div></details>
 <details class="fold"><summary>Known limits and ideas for later</summary><div class="body">
 <ul>
-<li><b>No email or calendar notifications</b> yet (reminders, handover notices). They can be added later with an email service.</li>
+<li><b>No emails at all</b> (no reminders, handover notices or self-service password reset). Connecting an email account (custom SMTP, e.g. a Gmail app password) would allow them later.</li>
 <li><b>No email confirmation at sign-up</b> (see Security).</li>
 <li><b>Not linked to Outlook.</b> Bookings don't appear in Outlook calendars.</li>
 <li><b>Free hosting.</b> See the free-plan limits above. Paid Supabase removes the 7-day pause.</li>
@@ -302,6 +307,7 @@ Database changes are migration files in <code>supabase/migrations</code>, with t
 <tr><td>17 Nov 2026</td><td>No limit on held slots per person. Old-money blue (Korn Thong) and green (Academy). Alternating hour stripes. Work week (Mon–Fri). Weeks start on Sunday.</td></tr>
 <tr><td>17 Nov 2026</td><td>Date formats d-MMM-yy and d/m/yyyy. Holidays as an editable table with Excel upload/download and a Year filter. Demo data removed.</td></tr>
 <tr><td>17 Nov 2026</td><td>A new or moved booking shows in every view (the page moves to it). My bookings grouped by day, with Check in all.</td></tr>
+<tr><td>17 Nov 2026</td><td>Home Screen icon (round meeting table) and name SHMRoom. Password reset by admins (temporary password, forced change), because the built-in email can't reach staff.</td></tr>
 <tr><td>17 Nov 2026</td><td>User management: staff list with fixed departments. Sign-up first limited to the list, then opened again the same day because it blocked new staff: listed people sign up with email + password, new people give name and department and join the list. Disabling shows upcoming bookings to hand over first, then cancels the rest. Admin panel in tabs. Database tests isolated from live bookings.</td></tr>
 </table>
 </div></details>
